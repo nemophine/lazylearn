@@ -1,0 +1,67 @@
+'use client';
+
+import { Bell, Coins, Search } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Input } from './ui/input';
+import { Progress } from './ui/progress';
+
+interface DesktopHeaderProps {
+  userName: string;
+  points: number;
+  level?: number;
+}
+
+export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProps) {
+  return (
+    <div className="h-20 bg-white border-b border-border px-8 flex items-center justify-between">
+      {/* Search Bar */}
+      <div className="flex-1 max-w-xl">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input
+            placeholder="Search lessons, courses, teachers..."
+            className="pl-10 bg-[var(--teal-50)] border-0 rounded-2xl h-12"
+          />
+        </div>
+      </div>
+
+      {/* Right Section */}
+      <div className="flex items-center gap-6">
+        {/* Daily Progress */}
+        <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-[var(--teal-50)] rounded-2xl">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-muted-foreground">Daily Goal</span>
+              <span className="text-xs">3/5 lessons</span>
+            </div>
+            <Progress value={60} className="h-1.5 w-32" />
+          </div>
+        </div>
+
+        {/* Points */}
+        <div className="flex items-center gap-2 bg-gradient-to-r from-[var(--yellow)] to-[var(--peach)] px-4 py-2 rounded-full">
+          <Coins className="w-5 h-5 text-[var(--teal-600)]" />
+          <span>{points.toLocaleString()}</span>
+        </div>
+
+        {/* Notifications */}
+        <button className="relative p-3 hover:bg-[var(--teal-50)] rounded-xl transition-colors">
+          <Bell className="w-5 h-5" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--coral)] rounded-full"></span>
+        </button>
+
+        {/* User Profile */}
+        <div className="flex items-center gap-3 pl-4 border-l border-border">
+          <div className="text-right">
+            <p className="text-sm">{userName}</p>
+            <p className="text-xs text-muted-foreground">Level {level}</p>
+          </div>
+          <Avatar className="w-10 h-10 border-2 border-[var(--teal-400)]">
+            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
+            <AvatarFallback>{userName[0]}</AvatarFallback>
+          </Avatar>
+        </div>
+      </div>
+    </div>
+  );
+}
