@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Lock, Unlock, Users, RefreshCw, ChevronDown, Flame, Music } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Play, Pause, RotateCcw, Lock, Unlock, Users, ChevronDown, Flame, Music } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -10,14 +10,16 @@ import { Progress } from '../ui/progress';
 import { Badge } from '../ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { useFocusMode } from '../../state/focus-mode-context';
 
 export function FocusPage() {
+  const focusSource = 'focus-session';
+  const { isFocusMode, reason, enterFocusMode, exitFocusMode } = useFocusMode();
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(0);
   const [selectedMusic, setSelectedMusic] = useState(0);
-  const [petMood, setPetMood] = useState('happy');
   const [isLocked, setIsLocked] = useState(false);
-  const [selectedPet, setSelectedPet] = useState({ emoji: '🐱', name: 'Whiskers', level: 5, mood: 'Happy' });
+  const [selectedPet] = useState({ emoji: '🐱', name: 'Whiskers', level: 5, mood: 'Happy' });
   const [showInviteFriends, setShowInviteFriends] = useState(false);
   const [showRelaxMode, setShowRelaxMode] = useState(false);
   const [unlockClicks, setUnlockClicks] = useState(0);
@@ -29,13 +31,6 @@ export function FocusPage() {
     { title: 'Soft Jazz', duration: '18:00', mood: 'Creative Flow' },
     { title: 'White Noise', duration: '30:00', mood: 'Background Focus' },
     { title: 'Nature Sounds', duration: '25:00', mood: 'Peaceful Study' },
-  ];
-
-  const availablePets = [
-    { emoji: '🐱', name: 'Whiskers', level: 5, mood: 'Happy' },
-    { emoji: '🐶', name: 'Buddy', level: 3, mood: 'Playful' },
-    { emoji: '🦊', name: 'Firefox', level: 4, mood: 'Curious' },
-    { emoji: '🐻', name: 'Teddy', level: 2, mood: 'Sleepy' },
   ];
 
   const friendsInFocus = [
@@ -63,10 +58,26 @@ export function FocusPage() {
   }, [isRunning, isLocked]);
 
   useEffect(() => {
-    if (time > 1800) setPetMood('excited');
-    else if (time > 600) setPetMood('happy');
-    else if (time > 0) setPetMood('content');
-    else setPetMood('sleepy');
+    if (isRunning && !isLocked) {
+      enterFocusMode(focusSource);
+    } else if (!isRunning && reason === focusSource) {
+      exitFocusMode();
+    }
+  }, [enterFocusMode, exitFocusMode, focusSource, isLocked, isRunning, reason]);
+
+  useEffect(() => {
+    return () => {
+      if (reason === focusSource) {
+        exitFocusMode();
+      }
+    };
+  }, [exitFocusMode, focusSource, reason]);
+
+  const petMood = useMemo(() => {
+    if (time > 1800) return 'excited';
+    if (time > 600) return 'happy';
+    if (time > 0) return 'content';
+    return 'sleepy';
   }, [time]);
 
   const formatTime = (seconds: number) => {
@@ -110,7 +121,9 @@ export function FocusPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="mb-1">Focus Mode 🎯</h2>
-          <p className="text-sm text-muted-foreground">Stay focused with your virtual pet and relaxing ambience</p>
+          <p className="text-sm text-muted-foreground">
+            {isFocusMode ? 'Community alerts are muted until you pause.' : 'Stay focused with your virtual pet and relaxing ambience'}
+          </p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -410,7 +423,7 @@ export function FocusPage() {
 
               {isLocked && unlockClicks === 1 && (
                 <div className="mt-6 p-4 bg-[var(--teal-100)] rounded-2xl text-center">
-                  <p className="text-sm text-foreground">🔒 Tap "Unlock" once more to exit focus mode</p>
+                  <p className="text-sm text-foreground">🔒 Tap &quot;Unlock&quot; once more to exit focus mode</p>
                 </div>
               )}
             </CardContent>
