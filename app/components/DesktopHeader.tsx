@@ -9,9 +9,10 @@ interface DesktopHeaderProps {
   userName: string;
   points: number;
   level?: number;
+  onNavigate?: (page: string) => void;
 }
 
-export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProps) {
+export function DesktopHeader({ userName, points, level = 5, onNavigate }: DesktopHeaderProps) {
   return (
     <div className="h-20 bg-white border-b border-border px-8 flex items-center justify-between">
       {/* Search Bar */}
@@ -51,7 +52,10 @@ export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProp
         </button>
 
         {/* User Profile */}
-        <div className="flex items-center gap-3 pl-4 border-l border-border">
+        <button
+          onClick={() => onNavigate?.('profile')}
+          className="flex items-center gap-3 pl-4 border-l border-border hover:bg-[var(--teal-50)] rounded-xl transition-colors pr-4 py-2"
+        >
           <div className="text-right">
             <p className="text-sm">{userName}</p>
             <p className="text-xs text-muted-foreground">Level {level}</p>
@@ -60,7 +64,7 @@ export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProp
             <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
             <AvatarFallback>{userName[0]}</AvatarFallback>
           </Avatar>
-        </div>
+        </button>
       </div>
     </div>
   );
