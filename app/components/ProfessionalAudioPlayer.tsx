@@ -352,8 +352,8 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
                 className="absolute w-3 h-3 bg-teal-600 rounded-full shadow-lg border-2 border-white z-10 transition-all duration-100"
                 style={{
                   left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)'
+                  top: '0px',
+                  transform: 'translate(-50%, 0)'
                 }}
               />
             )}
