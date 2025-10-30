@@ -18,9 +18,11 @@ import { CommunityPage } from './components/pages/CommunityPage';
 import { AnalysisPage } from './components/pages/AnalysisPage';
 import { CertificatePage } from './components/pages/CertificatePage';
 import { InteractionPage } from './components/pages/InteractionPage';
+import { SchedulePage } from './components/pages/SchedulePage';
 import { DonationPage } from './components/pages/DonationPage';
 import { CartoonPage } from './components/pages/CartoonPage';
 import { LoginPage } from './components/pages/LoginPage';
+import { apiService } from './services/api';
 
 const DEFAULT_PAGE = 'home';
 
@@ -29,6 +31,7 @@ function renderPage(
   onNavigate: (next: string, query?: string) => void,
   isAuthenticated: boolean,
   onLoginSuccess: () => void,
+  onLogout: () => void,
   isFirstTimeUser: boolean,
   searchQuery?: string,
 ): React.ReactElement {
@@ -42,7 +45,7 @@ function renderPage(
     case 'reward':
       return <RewardPage />;
     case 'profile':
-      return isAuthenticated ? <ProfilePage /> : <LoginPage onNavigate={onNavigate} onLoginSuccess={onLoginSuccess} isFirstTimeUser={isFirstTimeUser} />;
+      return isAuthenticated ? <ProfilePage onLogout={onLogout} /> : <LoginPage onNavigate={onNavigate} onLoginSuccess={onLoginSuccess} isFirstTimeUser={isFirstTimeUser} />;
     case 'knowledge':
       return <KnowledgePage />;
     case 'courses':
@@ -60,7 +63,7 @@ function renderPage(
     case 'certificate':
       return <CertificatePage />;
     case 'interaction':
-      return <InteractionPage />;
+      return <SchedulePage onNavigate={onNavigate} />;
     case 'donation':
       return <DonationPage />;
     case 'cartoon':
@@ -103,6 +106,28 @@ export default function Page() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      // Call API service logout method
+      await apiService.logout();
+
+      // Update authentication state
+      setIsAuthenticated(false);
+
+      // Navigate to home page
+      setCurrentPage('home');
+
+      console.log('User logged out successfully');
+    } catch (error) {
+      console.error('Logout failed:', error);
+
+      // Even if API call fails, still remove token locally and update state
+      apiService.removeAuthToken();
+      setIsAuthenticated(false);
+      setCurrentPage('home');
+    }
+  };
+
   const handleNavigate = (page: string, query?: string) => {
     console.log('Main navigation called:', { page, query });
     setCurrentPage(page);
@@ -123,7 +148,7 @@ export default function Page() {
       <div className={`${shouldShowLayout ? 'ml-64' : ''} flex-1 transition-all duration-300`}>
         {shouldShowLayout && <DesktopHeader userName="John Doe" points={2450} level={5} onNavigate={handleNavigate} />}
         <main className={`${shouldShowLayout ? 'min-h-[calc(100vh-5rem)]' : 'min-h-screen'}`}>
-          {renderPage(currentPage, handleNavigate, isAuthenticated, handleLoginSuccess, isFirstTimeUser, searchQuery)}
+          {renderPage(currentPage, handleNavigate, isAuthenticated, handleLoginSuccess, handleLogout, isFirstTimeUser, searchQuery)}
         </main>
       </div>
     </div>

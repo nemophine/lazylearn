@@ -52,7 +52,7 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
   const otherItems = [
     { id: 'analysis', icon: BarChart3, label: 'Analysis' },
     { id: 'certificate', icon: Award, label: 'Certificates' },
-    { id: 'interaction', icon: Calendar, label: 'My Schedule' },
+    { id: 'interaction', icon: Calendar, label: 'Schedule' },
     { id: 'donation', icon: DollarSign, label: 'Support Us' },
   ];
 
