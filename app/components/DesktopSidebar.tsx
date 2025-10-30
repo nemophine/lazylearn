@@ -1,17 +1,17 @@
 'use client';
 
-import { 
-  Home, 
-  Focus, 
-  Target, 
-  Gift, 
+import {
+  Home,
+  Focus,
+  Target,
+  Gift,
   User,
-  Search, 
-  Video, 
-  Gamepad2, 
-  GraduationCap, 
-  MessageSquare, 
-  BarChart3, 
+  Search,
+  Video,
+  Gamepad2,
+  GraduationCap,
+  MessageSquare,
+  BarChart3,
   Award,
   BookOpen,
   DollarSign,
@@ -32,13 +32,13 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
   const mainNavItems = [
     { id: 'home', icon: Home, label: 'Home' },
     { id: 'focus', icon: Focus, label: 'Focus Mode' },
-    { id: 'mission', icon: Target, label: 'Missions' },
+    { id: 'missions', icon: Target, label: 'Missions' },
     { id: 'reward', icon: Gift, label: 'Rewards' },
     { id: 'profile', icon: User, label: 'Profile' },
   ];
 
   const learningItems = [
-    { id: 'knowledge', icon: Video, label: 'Video Lessons' },
+    { id: 'courses', icon: BookOpen, label: 'Courses' },
     { id: 'game', icon: Gamepad2, label: 'Games & Quiz' },
     { id: 'search', icon: Search, label: 'Search' },
     { id: 'teacher', icon: GraduationCap, label: 'Line Teacher' },

@@ -5,22 +5,32 @@ import { Bell, Coins, Search, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Input } from './ui/input';
 import { Progress } from './ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { getDirectNavigation } from '../utils/searchData';
 
 interface DesktopHeaderProps {
   userName: string;
   points: number;
   level?: number;
-  onNavigate?: (page: string) => void;
+  onNavigate?: (page: string, searchQuery?: string) => void;
 }
 
 export function DesktopHeader({ userName, points, level = 5, onNavigate }: DesktopHeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDailyHovered, setIsDailyHovered] = useState(false);
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (searchQuery.trim()) {
-      onNavigate?.('search');
+      // Check for direct navigation first
+      const directRoute = getDirectNavigation(searchQuery);
+
+      if (directRoute) {
+        // Navigate directly to the page
+        onNavigate?.(directRoute);
+      } else {
+        // No direct match, go to search page with results
+        onNavigate?.('search', searchQuery);
+      }
     }
   };
 
@@ -54,7 +64,7 @@ export function DesktopHeader({ userName, points, level = 5, onNavigate }: Deskt
           {searchQuery && (
             <button
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-[var(--teal-100)] rounded-md transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 hover:bg-[var(--teal-100)] rounded-md transition-colors"
             >
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
@@ -65,35 +75,33 @@ export function DesktopHeader({ userName, points, level = 5, onNavigate }: Deskt
       {/* Right Section */}
       <div className="flex items-center gap-6">
         {/* Daily Progress */}
-        <div
-          className="relative hidden lg:flex flex-col z-10"
-          onMouseEnter={() => setIsDailyHovered(true)}
-          onMouseLeave={() => setIsDailyHovered(false)}
-          onClick={() => onNavigate?.('missions')}
-        >
-          <div className="flex items-center gap-3 px-4 py-2 bg-[var(--teal-50)] rounded-2xl cursor-pointer relative z-20">
-            <span className="text-sm font-medium">Daily Goal</span>
-          </div>
-
-          {/* Hover Details Box */}
-          {isDailyHovered && (
-            <div className="absolute top-full mt-8 left-1/2 transform -translate-x-1/2 w-64 bg-white border border-border rounded-lg shadow-lg p-4 z-0">
-              <div className="space-y-15">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Today's Progress</span>
-                  <span className="text-xs text-muted-foreground">60%</span>
+        <div className="hidden lg:flex">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onNavigate?.('missions')}
+                  className="flex items-center gap-3 px-4 py-2 bg-[var(--teal-50)] rounded-2xl text-foreground hover:shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  <span className="text-sm font-medium">Daily Goal</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-white border-[var(--teal-200)] shadow-lg">
+                <div className="text-center p-2">
+                  <p className="mb-2 text-sm font-medium">Today's Progress</p>
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="text-xs text-muted-foreground mr-2">60%</span>
+                    <Progress value={60} className="h-2 w-20" />
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Complete 2 more lessons to reach your daily goal!</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-lg">🐱</span>
+                    <span className="text-xs text-muted-foreground">Your pet is waiting for you!</span>
+                  </div>
                 </div>
-                <Progress value={60} className="h-2" />
-                <div className="text-xs text-muted-foreground">
-                  Complete 2 more lessons to reach your daily goal!
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-2xl">🐱</span>
-                  <span>Your pet is waiting for you!</span>
-                </div>
-              </div>
-            </div>
-          )}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Points */}

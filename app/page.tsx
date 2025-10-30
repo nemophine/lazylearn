@@ -10,6 +10,7 @@ import { MissionPage } from './components/pages/MissionPage';
 import { RewardPage } from './components/pages/RewardPage';
 import { ProfilePage } from './components/pages/ProfilePage';
 import { KnowledgePage } from './components/pages/KnowledgePage';
+import { CoursePage } from './components/pages/CoursePage';
 import { GameQuizPage } from './components/pages/GameQuizPage';
 import { SearchPage } from './components/pages/SearchPage';
 import { TeacherPage } from './components/pages/TeacherPage';
@@ -25,17 +26,18 @@ const DEFAULT_PAGE = 'home';
 
 function renderPage(
   page: string,
-  onNavigate: (next: string) => void,
+  onNavigate: (next: string, query?: string) => void,
   isAuthenticated: boolean,
   onLoginSuccess: () => void,
   isFirstTimeUser: boolean,
+  searchQuery?: string,
 ): React.ReactElement {
   switch (page) {
     case 'home':
       return <HomePage onNavigate={onNavigate} />;
     case 'focus':
       return <FocusPage />;
-    case 'mission':
+    case 'missions':
       return <MissionPage />;
     case 'reward':
       return <RewardPage />;
@@ -43,10 +45,12 @@ function renderPage(
       return isAuthenticated ? <ProfilePage /> : <LoginPage onNavigate={onNavigate} onLoginSuccess={onLoginSuccess} isFirstTimeUser={isFirstTimeUser} />;
     case 'knowledge':
       return <KnowledgePage />;
+    case 'courses':
+      return <CoursePage onNavigate={onNavigate} />;
     case 'game':
       return <GameQuizPage />;
     case 'search':
-      return <SearchPage />;
+      return <SearchPage initialQuery={searchQuery} onNavigate={onNavigate} />;
     case 'teacher':
       return <TeacherPage />;
     case 'community':
@@ -68,6 +72,7 @@ function renderPage(
 
 export default function Page() {
   const [currentPage, setCurrentPage] = useState<string>(DEFAULT_PAGE);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   // Check authentication status on mount
@@ -98,8 +103,15 @@ export default function Page() {
     }
   };
 
-  const handleNavigate = (page: string) => {
+  const handleNavigate = (page: string, query?: string) => {
+    console.log('Main navigation called:', { page, query });
     setCurrentPage(page);
+    if (query) {
+      setSearchQuery(query);
+    } else {
+      // Clear search query when navigating without a query
+      setSearchQuery('');
+    }
   };
 
   // Hide sidebar and header when on login page
@@ -111,7 +123,7 @@ export default function Page() {
       <div className={`${shouldShowLayout ? 'ml-64' : ''} flex-1 transition-all duration-300`}>
         {shouldShowLayout && <DesktopHeader userName="John Doe" points={2450} level={5} onNavigate={handleNavigate} />}
         <main className={`${shouldShowLayout ? 'min-h-[calc(100vh-5rem)]' : 'min-h-screen'}`}>
-          {renderPage(currentPage, handleNavigate, isAuthenticated, handleLoginSuccess, isFirstTimeUser)}
+          {renderPage(currentPage, handleNavigate, isAuthenticated, handleLoginSuccess, isFirstTimeUser, searchQuery)}
         </main>
       </div>
     </div>
