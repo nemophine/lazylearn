@@ -25,6 +25,12 @@ interface ScheduleEvent {
   description?: string;
 }
 
+interface DateMark {
+  date: string; // YYYY-MM-DD format
+  color: string;
+  note?: string;
+}
+
 
 interface SchedulePageProps {
   onNavigate?: (page: string) => void;
@@ -35,8 +41,20 @@ export function SchedulePage({ onNavigate }: SchedulePageProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [hoveredDay, setHoveredDay] = useState<Date | null>(null);
   const [hoveredDayEvents, setHoveredDayEvents] = useState<ScheduleEvent[]>([]);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showMarkModal, setShowMarkModal] = useState(false);
+  const [newEvent, setNewEvent] = useState<Partial<ScheduleEvent>>({
+    title: '',
+    time: '',
+    duration: '',
+    type: 'other',
+    description: ''
+  });
+  const [newMark, setNewMark] = useState<{ color: string; note: string }>({
+    color: '#3B82F6',
+    note: ''
+  });
 
-  
   // Sample schedule data - you can connect this to your database later
   const [events, setEvents] = useState<ScheduleEvent[]>([
     {
@@ -78,6 +96,62 @@ export function SchedulePage({ onNavigate }: SchedulePageProps) {
     },
   ]);
 
+  // Date marks for manual color marking
+  const [dateMarks, setDateMarks] = useState<DateMark[]>([
+    { date: '2025-11-05', color: '#10B981', note: 'Important deadline' },
+    { date: '2025-11-10', color: '#F59E0B', note: 'Meeting with team' },
+    { date: '2025-11-15', color: '#EF4444', note: 'Project presentation' },
+  ]);
+
+  const availableColors = [
+    '#3B82F6', // blue
+    '#10B981', // green
+    '#F59E0B', // amber
+    '#EF4444', // red
+    '#8B5CF6', // purple
+    '#EC4899', // pink
+    '#14B8A6', // teal
+    '#F97316', // orange
+  ];
+
+  // Helper functions
+
+  const getDateMark = (date: Date): DateMark | null => {
+    const dateKey = getDateKey(date);
+    return dateMarks.find(mark => mark.date === dateKey) || null;
+  };
+
+  const addDateMark = (date: Date, color: string, note?: string) => {
+    const dateKey = getDateKey(date);
+    const existingMarkIndex = dateMarks.findIndex(mark => mark.date === dateKey);
+
+    if (existingMarkIndex >= 0) {
+      // Update existing mark
+      const updatedMarks = [...dateMarks];
+      updatedMarks[existingMarkIndex] = { date: dateKey, color, note };
+      setDateMarks(updatedMarks);
+    } else {
+      // Add new mark
+      setDateMarks([...dateMarks, { date: dateKey, color, note }]);
+    }
+  };
+
+  const removeDateMark = (date: Date) => {
+    const dateKey = getDateKey(date);
+    setDateMarks(dateMarks.filter(mark => mark.date !== dateKey));
+  };
+
+  const addEvent = (event: Omit<ScheduleEvent, 'id'>) => {
+    const newEventWithId: ScheduleEvent = {
+      ...event,
+      id: Date.now().toString(),
+      date: selectedDate,
+    };
+    setEvents([...events, newEventWithId]);
+    setNewEvent({ title: '', time: '', duration: '', type: 'other', description: '' });
+    setShowEventModal(false);
+  };
+
   // Calendar functions
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -99,6 +173,16 @@ export function SchedulePage({ onNavigate }: SchedulePageProps) {
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
+  };
+
+  const handleDayRightClick = (e: React.MouseEvent, date: Date) => {
+    e.preventDefault();
+    setSelectedDate(date);
+    setShowMarkModal(true);
+  };
+
+  const handleAddEvent = () => {
+    setShowEventModal(true);
   };
 
   const handleDayHover = (date: Date) => {
@@ -147,44 +231,76 @@ export function SchedulePage({ onNavigate }: SchedulePageProps) {
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
       const dayEvents = getEventsForDate(date);
+      const dateMark = getDateMark(date);
       const isToday = date.toDateString() === new Date().toDateString();
       const isSelected = date.toDateString() === selectedDate.toDateString();
+
+      // Determine background color
+      let bgColorClass = 'bg-white border-gray-200';
+      if (isToday) {
+        bgColorClass = 'bg-gradient-to-br from-blue-500 to-teal-500 border-blue-600 shadow-lg';
+      } else if (dateMark) {
+        bgColorClass = 'border-2 shadow-md';
+      }
 
       days.push(
         <div
           key={day}
           onClick={() => handleDayClick(date)}
+          onContextMenu={(e) => handleDayRightClick(e, date)}
           onMouseEnter={() => handleDayHover(date)}
           onMouseLeave={handleDayLeave}
-          className={`h-16 border p-1 cursor-pointer transition-all duration-200 hover:shadow-md hover:z-10 rounded-lg relative overflow-hidden group aspect-square ${
-            isToday
-              ? 'bg-gradient-to-br from-blue-50 via-teal-50 to-cyan-50 border-teal-400 shadow-md ring-2 ring-teal-100'
-              : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+          className={`h-16 border p-1 cursor-pointer transition-all duration-200 hover:shadow-md hover:z-10 rounded-lg relative overflow-hidden group aspect-square hover:scale-105 ${
+            bgColorClass
           } ${isSelected ? 'ring-2 ring-teal-500 ring-offset-1 shadow-lg z-20' : ''}`}
+          style={dateMark && !isToday ? { backgroundColor: dateMark.color, borderColor: dateMark.color } : {}}
         >
           {/* Day number */}
-          <div className={`text-xs font-bold ${isToday ? 'text-[var(--teal-700)]' : 'text-gray-900'}`}>
+          <div className={`text-xs font-bold ${
+            isToday ? 'text-white' :
+            dateMark ? 'text-white' :
+            'text-gray-900'
+          }`}>
             {day}
           </div>
+
+          {/* Date mark indicator */}
+          {dateMark && !isToday && (
+            <div className="absolute top-1 right-1">
+              <div className="w-2 h-2 bg-white rounded-full opacity-70"></div>
+            </div>
+          )}
 
           {/* Events indicator */}
           {dayEvents.length > 0 && (
             <div className="absolute bottom-1 right-1">
               <div className={`w-2 h-2 rounded-full ${
+                isToday ? 'bg-white' :
                 dayEvents.some(e => e.type === 'course') ? 'bg-blue-500' :
                 dayEvents.some(e => e.type === 'mission') ? 'bg-green-500' :
                 dayEvents.some(e => e.type === 'study') ? 'bg-purple-500' :
                 'bg-gray-500'
               }`}></div>
               {dayEvents.length > 1 && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                <div className={`absolute -top-1 -right-1 w-3 h-3 ${
+                  isToday ? 'bg-white text-blue-600' : 'bg-red-500 text-white'
+                } text-xs rounded-full flex items-center justify-center font-bold`}>
                   {dayEvents.length}
                 </div>
               )}
             </div>
           )}
 
-          </div>
+          {/* Today badge */}
+          {isToday && (
+            <div className="absolute top-1 left-1">
+              <div className="px-1 py-0.5 bg-white/90 text-blue-600 text-xs font-bold rounded">
+                TODAY
+              </div>
+            </div>
+          )}
+
+        </div>
       );
     }
 
@@ -298,13 +414,40 @@ export function SchedulePage({ onNavigate }: SchedulePageProps) {
               })}
             </div>
 
+            {/* Date mark info */}
+            {getDateMark(hoveredDay || selectedDate) && (
+              <div className="mb-4 p-3 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: getDateMark(hoveredDay || selectedDate)?.color }}
+                  ></div>
+                  <span className="text-sm font-medium text-gray-700">Marked Date</span>
+                </div>
+                {getDateMark(hoveredDay || selectedDate)?.note && (
+                  <p className="text-xs text-gray-600">{getDateMark(hoveredDay || selectedDate)?.note}</p>
+                )}
+              </div>
+            )}
+
+            {/* Add Event Button */}
+            <div className="mb-4">
+              <button
+                onClick={handleAddEvent}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[var(--teal-500)] text-white rounded-lg hover:bg-[var(--teal-600)] transition-colors text-sm font-medium"
+              >
+                <Plus className="w-4 h-4" />
+                Add Event
+              </button>
+            </div>
+
             {/* Events list */}
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {(hoveredDayEvents.length > 0 ? hoveredDayEvents : selectedDateEvents).length === 0 ? (
                 <div className="text-center py-6">
                   <CalendarIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                   <p className="text-sm text-gray-500">No events scheduled</p>
-                  <p className="text-xs text-gray-400 mt-1">Hover over a day to see details</p>
+                  <p className="text-xs text-gray-400 mt-1">Right-click a day to mark it, or click "Add Event"</p>
                 </div>
               ) : (
                 (hoveredDayEvents.length > 0 ? hoveredDayEvents : selectedDateEvents).map(event => (
@@ -357,6 +500,182 @@ export function SchedulePage({ onNavigate }: SchedulePageProps) {
           </div>
         </div>
       </div>
+
+      {/* Color Mark Modal */}
+      {showMarkModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-96 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Mark Date</h3>
+              <button
+                onClick={() => setShowMarkModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-3">
+                Mark {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              </p>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Choose Color</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {availableColors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setNewMark({ ...newMark, color })}
+                      className={`w-12 h-12 rounded-lg border-2 transition-all ${
+                        newMark.color === color ? 'border-gray-900 scale-110' : 'border-gray-300'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Note (optional)</label>
+                <input
+                  type="text"
+                  value={newMark.note}
+                  onChange={(e) => setNewMark({ ...newMark, note: e.target.value })}
+                  placeholder="Add a note for this date..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (newMark.color) {
+                    addDateMark(selectedDate, newMark.color, newMark.note);
+                    setShowMarkModal(false);
+                    setNewMark({ color: '#3B82F6', note: '' });
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-[var(--teal-500)] text-white rounded-lg hover:bg-[var(--teal-600)] transition-colors font-medium text-sm"
+              >
+                Mark Date
+              </button>
+              <button
+                onClick={() => {
+                  removeDateMark(selectedDate);
+                  setShowMarkModal(false);
+                  setNewMark({ color: '#3B82F6', note: '' });
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Event Modal */}
+      {showEventModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-96 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Add Event</h3>
+              <button
+                onClick={() => setShowEventModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+                <input
+                  type="text"
+                  value={newEvent.title}
+                  onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                  placeholder="Enter event title..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                  <input
+                    type="text"
+                    value={newEvent.time}
+                    onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
+                    placeholder="10:00 AM"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                  <input
+                    type="text"
+                    value={newEvent.duration}
+                    onChange={(e) => setNewEvent({ ...newEvent, duration: e.target.value })}
+                    placeholder="1h 30m"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <select
+                  value={newEvent.type}
+                  onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value as ScheduleEvent['type'] })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                >
+                  <option value="course">Course</option>
+                  <option value="mission">Mission</option>
+                  <option value="study">Study</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                <textarea
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                  placeholder="Add event description..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => {
+                  if (newEvent.title && newEvent.time && newEvent.duration) {
+                    addEvent(newEvent as Omit<ScheduleEvent, 'id'>);
+                  }
+                }}
+                disabled={!newEvent.title || !newEvent.time || !newEvent.duration}
+                className="flex-1 px-4 py-2 bg-[var(--teal-500)] text-white rounded-lg hover:bg-[var(--teal-600)] transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add Event
+              </button>
+              <button
+                onClick={() => {
+                  setShowEventModal(false);
+                  setNewEvent({ title: '', time: '', duration: '', type: 'other', description: '' });
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

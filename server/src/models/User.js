@@ -1,20 +1,16 @@
 // User Model - Database operations for users
-// Type-safe database operations using Kysely
+// Type-safe database operations using Kysely (JavaScript version)
 
 import bcrypt from 'bcryptjs';
-import { db } from '../db';
-import type {
-  User,
-  NewUser,
-  UpdateUser,
-  ApiResponse
-} from '../db/types';
+import { db } from '../db/index.js';
 
 export class UserModel {
-  private static readonly BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12');
+  static get BCRYPT_ROUNDS() {
+    return parseInt(process.env.BCRYPT_ROUNDS || '12');
+  }
 
   // Create a new user
-  static async create(userData: NewUser): Promise<ApiResponse<User>> {
+  static async create(userData) {
     try {
       // Hash password
       const passwordHash = await bcrypt.hash(userData.password_hash, this.BCRYPT_ROUNDS);
@@ -50,7 +46,7 @@ export class UserModel {
         };
       }
 
-      const user: User = {
+      const user = {
         ...result,
         preferences: JSON.parse(result.preferences || '{}'),
       };
@@ -80,7 +76,7 @@ export class UserModel {
   }
 
   // Find user by email
-  static async findByEmail(email: string): Promise<User | null> {
+  static async findByEmail(email) {
     try {
       const result = await db
         .selectFrom('users')
@@ -103,7 +99,7 @@ export class UserModel {
   }
 
   // Find user by ID
-  static async findById(id: number): Promise<User | null> {
+  static async findById(id) {
     try {
       const result = await db
         .selectFrom('users')
@@ -126,7 +122,7 @@ export class UserModel {
   }
 
   // Verify user password
-  static async verifyPassword(user: User, password: string): Promise<boolean> {
+  static async verifyPassword(user, password) {
     try {
       // Need to get the password hash from database since User type doesn't include it
       const userWithPassword = await db
@@ -147,9 +143,9 @@ export class UserModel {
   }
 
   // Update user
-  static async update(id: number, updateData: UpdateUser): Promise<ApiResponse<User>> {
+  static async update(id, updateData) {
     try {
-      const updateValues: any = { ...updateData };
+      const updateValues = { ...updateData };
 
       // Handle preferences
       if (updateData.preferences) {
@@ -186,7 +182,7 @@ export class UserModel {
         };
       }
 
-      const user: User = {
+      const user = {
         ...result,
         preferences: JSON.parse(result.preferences || '{}'),
       };
@@ -207,7 +203,7 @@ export class UserModel {
   }
 
   // Update user level and experience
-  static async updateExperience(id: number, experienceGained: number): Promise<ApiResponse<User>> {
+  static async updateExperience(id, experienceGained) {
     try {
       const user = await this.findById(id);
       if (!user) {
@@ -235,7 +231,7 @@ export class UserModel {
   }
 
   // Update user streak
-  static async updateStreak(id: number): Promise<ApiResponse<User>> {
+  static async updateStreak(id) {
     try {
       const user = await this.findById(id);
       if (!user) {
@@ -281,12 +277,7 @@ export class UserModel {
   }
 
   // Log user activity
-  static async logActivity(
-    userId: number,
-    activityType: string,
-    relatedId?: number,
-    metadata?: Record<string, any>
-  ): Promise<boolean> {
+  static async logActivity(userId, activityType, relatedId, metadata) {
     try {
       await db
         .insertInto('user_activity_log')
@@ -295,7 +286,7 @@ export class UserModel {
           activity_type: activityType,
           related_id: relatedId || null,
           metadata: JSON.stringify(metadata || {}),
-          created_at: new Date(),
+          created_at: new Date().toISOString(),
         })
         .execute();
 
@@ -307,7 +298,7 @@ export class UserModel {
   }
 
   // Get user stats
-  static async getStats(userId: number) {
+  static async getStats(userId) {
     try {
       const [
         coursesEnrolled,
@@ -320,14 +311,14 @@ export class UserModel {
         // Total courses enrolled
         db
           .selectFrom('user_course_progress')
-          .select(({ fn }) => [fn.count<number>('id').as('count')])
+          .select(db.fn.count('id').as('count'))
           .where('user_id', '=', userId)
           .executeTakeFirst(),
 
         // Total courses completed
         db
           .selectFrom('user_course_progress')
-          .select(({ fn }) => [fn.count<number>('id').as('count')])
+          .select(db.fn.count('id').as('count'))
           .where('user_id', '=', userId)
           .where('is_completed', '=', true)
           .executeTakeFirst(),
@@ -335,7 +326,7 @@ export class UserModel {
         // Total lessons completed
         db
           .selectFrom('user_lesson_progress')
-          .select(({ fn }) => [fn.count<number>('id').as('count')])
+          .select(db.fn.count('id').as('count'))
           .where('user_id', '=', userId)
           .where('is_completed', '=', true)
           .executeTakeFirst(),
@@ -343,14 +334,14 @@ export class UserModel {
         // Total time spent
         db
           .selectFrom('user_lesson_progress')
-          .select(({ fn }) => [fn.sum<number>('watch_time_minutes').as('total')])
+          .select(db.fn.sum('watch_time_minutes').as('total'))
           .where('user_id', '=', userId)
           .executeTakeFirst(),
 
         // Total achievements
         db
           .selectFrom('user_achievements')
-          .select(({ fn }) => [fn.count<number>('id').as('count')])
+          .select(db.fn.count('id').as('count'))
           .where('user_id', '=', userId)
           .executeTakeFirst(),
 
@@ -363,12 +354,12 @@ export class UserModel {
       ]);
 
       return {
-        coursesEnrolled: coursesEnrolled?.count || 0,
-        coursesCompleted: coursesCompleted?.count || 0,
-        lessonsCompleted: lessonsCompleted?.count || 0,
-        totalHours: Math.floor((totalTime?.total || 0) / 60),
-        achievements: achievements?.count || 0,
-        currentStreak: currentStreak?.streak_days || 0,
+        coursesEnrolled: parseInt(coursesEnrolled?.count || 0),
+        coursesCompleted: parseInt(coursesCompleted?.count || 0),
+        lessonsCompleted: parseInt(lessonsCompleted?.count || 0),
+        totalHours: Math.floor((parseInt(totalTime?.total || 0)) / 60),
+        achievements: parseInt(achievements?.count || 0),
+        currentStreak: parseInt(currentStreak?.streak_days || 0),
       };
     } catch (error) {
       console.error('Error getting user stats:', error);
@@ -384,7 +375,7 @@ export class UserModel {
   }
 
   // Delete user (soft delete by setting inactive status)
-  static async delete(id: number): Promise<ApiResponse<null>> {
+  static async delete(id) {
     try {
       const result = await db
         .deleteFrom('users')

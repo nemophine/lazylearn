@@ -8,7 +8,17 @@ import { Switch } from '../ui/switch';
 import { Progress } from '../ui/progress';
 import { Button } from '../ui/button';
 
-export function ProfilePage() {
+interface ProfilePageProps {
+  onLogout?: () => void;
+}
+
+export function ProfilePage({ onLogout }: ProfilePageProps) {
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
   const stats = [
     { label: 'Courses', value: '24' },
     { label: 'Hours', value: '156' },
@@ -135,6 +145,7 @@ export function ProfilePage() {
       <Button
         variant="outline"
         className="w-full rounded-2xl h-12 text-destructive border-destructive/30 hover:bg-destructive/10"
+        onClick={handleLogout}
       >
         <LogOut className="w-5 h-5 mr-2" />
         Log Out
