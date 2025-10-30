@@ -114,6 +114,25 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
     }
   }, [volume, isMuted]);
 
+  // Add interval to update currentTime more frequently for smooth thumb movement
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isPlaying && audioRef.current) {
+      interval = setInterval(() => {
+        if (audioRef.current) {
+          setCurrentTime(audioRef.current.currentTime);
+        }
+      }, 100); // Update every 100ms for smooth movement
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isPlaying]);
+
   // Function to create ambient sounds based on track type
   const createAmbientSound = (trackType: string) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -349,11 +368,11 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
             {/* Always visible thumb when track is loaded */}
             {(duration > 0) && (
               <div
-                className="absolute w-3 h-3 bg-teal-600 rounded-full shadow-lg border-2 border-white z-10 transition-all duration-100"
+                className="absolute w-4 h-4 bg-teal-500 rounded-full shadow-lg border-2 border-teal-600 z-10 hover:bg-teal-400 cursor-pointer transition-none"
                 style={{
-                  left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
-                  top: '0px',
-                  transform: 'translate(-50%, 0)'
+                  left: `${duration > 0 ? Math.max(0, Math.min(100, (currentTime / duration) * 100)) : 0}%`,
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)'
                 }}
               />
             )}
