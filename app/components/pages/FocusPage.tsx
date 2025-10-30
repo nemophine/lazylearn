@@ -579,9 +579,17 @@ export function FocusPage() {
                       Focus Duration: {formatTime(time)}
                     </label>
 
+                    {/* Timer Progress Bar - Super Simple with Dragging */}
                     <div
                       ref={timerRef}
-                      className="relative h-12 bg-gray-100 rounded-lg mb-4 cursor-pointer group"
+                      style={{
+                        position: 'relative',
+                        height: '48px',
+                        backgroundColor: '#e5e7eb',
+                        borderRadius: '8px',
+                        marginBottom: '16px',
+                        cursor: !isRunning ? 'pointer' : 'default'
+                      }}
                       onMouseDown={(e) => {
                         if (!isRunning) {
                           setIsDragging(true);
@@ -589,52 +597,52 @@ export function FocusPage() {
                         }
                       }}
                     >
-                      {/* Progress Background */}
-                      <div className="absolute inset-0 bg-gray-200 rounded-lg"></div>
-
                       {/* Progress Fill */}
                       <div
-                        className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-400 to-teal-500 rounded-lg transition-all duration-200"
-                        style={{ width: `${(time / (selectedDuration * 60)) * 100}%` }}
-                      ></div>
+                        style={{
+                          width: `${(time / (selectedDuration * 60)) * 100}%`,
+                          height: '100%',
+                          backgroundColor: '#14b8a6',
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          borderRadius: '8px'
+                        }}
+                      />
 
                       {/* Draggable Thumb */}
                       {!isRunning && (
                         <div
-                          className="absolute w-6 h-6 bg-white border-2 border-teal-500 rounded-full shadow-lg cursor-grab active:cursor-grabbing hover:scale-110 transition-all"
                           style={{
+                            position: 'absolute',
+                            width: '20px',
+                            height: '20px',
+                            backgroundColor: 'white',
+                            border: '2px solid #14b8a6',
+                            borderRadius: '50%',
                             left: `${(time / (selectedDuration * 60)) * 100}%`,
                             top: '50%',
                             transform: 'translate(-50%, -50%)',
+                            cursor: 'grab',
                             zIndex: 10
                           }}
-                        >
-                          <div className="absolute inset-0 bg-teal-500 rounded-full animate-ping opacity-20"></div>
-                          {/* Time display inside thumb */}
-                          <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-teal-600">
-                            {Math.ceil(time / 60)}m
-                          </div>
-                        </div>
+                        />
                       )}
 
-                      {/* Time Hover Display */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-teal-600 transition-colors">
-                          {Math.ceil(time / 60)} min
-                        </span>
-                      </div>
-
-                      {/* Hover Time Selector Box */}
-                      <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                        <div className="flex flex-col gap-1">
-                          <div>Focus: {selectedDuration} min</div>
-                          <div>Short Break: 5 min</div>
-                          <div>Long Break: 15 min</div>
-                          <div className="text-teal-400 pt-1 border-t border-gray-700">
-                            Total: {Math.ceil(getTotalSessionTime() / 60)} min
-                          </div>
-                        </div>
-                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                      {/* Time Display */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          color: '#374151',
+                          pointerEvents: 'none'
+                        }}
+                      >
+                        {Math.ceil(time / 60)} min
                       </div>
                     </div>
 

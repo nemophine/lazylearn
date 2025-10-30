@@ -28,7 +28,9 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLooping, setIsLooping] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
@@ -290,6 +292,45 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
     }
   }, [isSelected]);
 
+  // Progress bar drag handlers
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && progressBarRef.current && audioRef.current) {
+        const rect = progressBarRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        const newTime = percentage * duration;
+        audioRef.current.currentTime = newTime;
+        setCurrentTime(newTime);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, duration]);
+
+  const handleProgressDrag = (clientX: number) => {
+    if (!progressBarRef.current || !audioRef.current) return;
+
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(1, x / rect.width));
+    const newTime = percentage * duration;
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
   return (
     <div className={`bg-white rounded-lg shadow-lg border ${
       isSelected ? 'border-teal-400' : 'border-gray-200'
@@ -346,36 +387,57 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
             <span className="text-left">{formatTime(currentTime)}</span>
             <span className="text-right">{formatTime(duration)}</span>
           </div>
-          {/* Interactive Progress Bar - Click to seek */}
-          <div
-            className="relative w-full h-2 bg-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-300 group"
-            onClick={(e) => {
-              if (!duration) return;
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const percentage = x / rect.width;
-              const newTime = percentage * duration;
 
-              if (audioRef.current) {
-                audioRef.current.currentTime = newTime;
-                setCurrentTime(newTime);
-              }
+          {/* Progress Bar Container */}
+          <div
+            ref={progressBarRef}
+            style={{
+              width: '100%',
+              height: '8px',
+              backgroundColor: '#d1d5db',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              position: 'relative'
             }}
-            title={`${formatTime(currentTime)} / ${formatTime(duration)}`}
+            onMouseDown={(e) => {
+              setIsDragging(true);
+              handleProgressDrag(e.clientX);
+            }}
           >
-            {/* Progress fill */}
+            {/* Progress Fill - Super Simple */}
             <div
-              className="absolute left-0 top-0 h-full bg-teal-500 rounded-lg transition-all duration-100 group-hover:bg-teal-600"
-              style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+              style={{
+                width: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%',
+                height: '100%',
+                backgroundColor: '#14b8a6',
+                borderRadius: '4px'
+              }}
+            />
+
+            {/* Draggable Thumb */}
+            <div
+              style={{
+                position: 'absolute',
+                width: '16px',
+                height: '16px',
+                backgroundColor: 'white',
+                border: '2px solid #14b8a6',
+                borderRadius: '50%',
+                left: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                cursor: 'grab',
+                zIndex: 10
+              }}
             />
           </div>
         </div>
 
-        {/* Volume Control */}
+        {/* Volume Control - Super Simple */}
         <div className="flex items-center gap-2">
           <button
             onClick={toggleMute}
-            className="p-1 text-gray-600 hover:text-gray-900 transition-colors"
+            className="p-1 text-gray-600 hover:text-gray-900"
           >
             {isMuted ? (
               <VolumeX className="w-4 h-4" />
@@ -383,16 +445,43 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
               <Volume2 className="w-4 h-4" />
             )}
           </button>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={volume}
-            onChange={handleVolumeChange}
-            className="flex-1 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb-left"
-          />
-          <span className="text-xs text-gray-500 w-8 text-right">
+
+          {/* Volume Bar Container */}
+          <div
+            style={{
+              flex: 1,
+              height: '8px',
+              backgroundColor: '#e5e7eb',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              position: 'relative'
+            }}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const percentage = x / rect.width;
+              const newVolume = Math.max(0, Math.min(1, percentage));
+              setVolume(newVolume);
+              if (newVolume > 0 && isMuted) {
+                setIsMuted(false);
+              }
+              if (audioRef.current) {
+                audioRef.current.volume = isMuted ? 0 : newVolume;
+              }
+            }}
+          >
+            {/* Volume Fill */}
+            <div
+              style={{
+                width: isMuted ? '0%' : `${volume * 100}%`,
+                height: '100%',
+                backgroundColor: '#14b8a6',
+                borderRadius: '4px'
+              }}
+            />
+          </div>
+
+          <span style={{ fontSize: '12px', color: '#6b7280', width: '32px', textAlign: 'right' }}>
             {Math.round(volume * 100)}%
           </span>
         </div>
