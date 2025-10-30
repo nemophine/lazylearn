@@ -66,6 +66,15 @@ export function FocusPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(25 * 60); // Default 25 minutes in seconds
   const [selectedDuration, setSelectedDuration] = useState(25); // minutes
+  const [isDraggingTimer, setIsDraggingTimer] = useState(false);
+  const [showTimeSelector, setShowTimeSelector] = useState(false);
+  const timerRef = useRef<HTMLDivElement>(null);
+
+  // Pomodoro cycle state
+  const [pomodoroType, setPomodoroType] = useState<'focus' | 'shortBreak' | 'longBreak'>('focus');
+  const [currentCycle, setCurrentCycle] = useState(1);
+  const [totalCycles, setTotalCycles] = useState(4);
+  const [isDragging, setIsDragging] = useState(false);
   const [isSetupMode, setIsSetupMode] = useState(true);
   const [selectedMusic, setSelectedMusic] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
@@ -187,8 +196,8 @@ export function FocusPage() {
       interval = setInterval(() => {
         setTime((prevTime) => {
           if (prevTime <= 1) {
-            // Timer completed!
-            handleSessionComplete();
+            // Timer completed! Use Pomodoro handler
+            handlePomodoroComplete();
             return 0;
           }
           return prevTime - 1;
@@ -196,7 +205,29 @@ export function FocusPage() {
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isRunning, isLocked, time]);
+  }, [isRunning, isLocked, time, pomodoroType, currentCycle, totalCycles, selectedDuration]);
+
+  // Timer drag handlers
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        handleTimerDrag(e.clientX);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, selectedDuration]);
 
   // Calculate total time (always returns 0)
   const getTodayTotalTime = () => {
@@ -235,9 +266,10 @@ export function FocusPage() {
   const handleBackToSetup = () => {
     setIsSetupMode(true);
     setIsRunning(false);
-    // Reset timer to default
-    setTime(25 * 60); // 25 minutes default
-    setSelectedDuration(25); // Reset to default 25 minutes
+    // Reset Pomodoro state
+    setPomodoroType('focus');
+    setCurrentCycle(1);
+    setTime(selectedDuration * 60); // Use selected duration
   };
 
   const petMood = () => {
@@ -252,6 +284,96 @@ export function FocusPage() {
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Pomodoro helper functions
+  const getPomodoroDuration = (type: 'focus' | 'shortBreak' | 'longBreak') => {
+    switch (type) {
+      case 'focus': return selectedDuration * 60;
+      case 'shortBreak': return 5 * 60; // 5 minutes
+      case 'longBreak': return 15 * 60; // 15 minutes
+      default: return 25 * 60;
+    }
+  };
+
+  const getTotalSessionTime = () => {
+    // Calculate total time for Pomodoro cycles (focus + breaks)
+    let totalTime = 0;
+    for (let i = 1; i <= totalCycles; i++) {
+      totalTime += getPomodoroDuration('focus');
+      if (i < totalCycles) {
+        // Add break time (long break after 3rd cycle)
+        totalTime += getPomodoroDuration(i % 4 === 0 ? 'longBreak' : 'shortBreak');
+      }
+    }
+    return totalTime;
+  };
+
+  const getCurrentSessionProgress = () => {
+    const currentSessionDuration = getPomodoroDuration(pomodoroType);
+    const elapsed = currentSessionDuration - time;
+    return (elapsed / currentSessionDuration) * 100;
+  };
+
+  const getTotalProgress = () => {
+    // Calculate progress through entire Pomodoro session
+    const totalSessionTime = getTotalSessionTime();
+    const completedTime = (currentCycle - 1) * (getPomodoroDuration('focus') + getPomodoroDuration(currentCycle > 1 && (currentCycle - 1) % 4 === 0 ? 'longBreak' : 'shortBreak'));
+    const currentElapsed = getPomodoroDuration(pomodoroType) - time;
+    return ((completedTime + currentElapsed) / totalSessionTime) * 100;
+  };
+
+  const handlePomodoroComplete = () => {
+    setIsRunning(false);
+
+    // Add completed session
+    const sessionData = { completed: true, duration: getPomodoroDuration(pomodoroType) };
+    setTodaySessions(prev => [...prev, sessionData]);
+
+    // Save to localStorage
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('today_sessions', JSON.stringify({
+      date: today,
+      sessions: [...todaySessions, sessionData]
+    }));
+
+    // Move to next session or break
+    if (pomodoroType === 'focus') {
+      if (currentCycle < totalCycles) {
+        // Go to break
+        const isLongBreak = currentCycle % 4 === 0;
+        setPomodoroType(isLongBreak ? 'longBreak' : 'shortBreak');
+        setTime(getPomodoroDuration(isLongBreak ? 'longBreak' : 'shortBreak'));
+      } else {
+        // All cycles complete
+        setPomodoroType('focus');
+        setCurrentCycle(1);
+        setTime(getPomodoroDuration('focus'));
+      }
+    } else {
+      // Break complete, go to next focus session
+      setPomodoroType('focus');
+      setCurrentCycle(prev => prev + 1);
+      setTime(getPomodoroDuration('focus'));
+    }
+  };
+
+  const handleTimeChange = (newTime: number) => {
+    if (!isRunning) {
+      setTime(newTime);
+    }
+  };
+
+  const handleTimerDrag = (clientX: number) => {
+    if (!timerRef.current || isRunning) return;
+
+    const rect = timerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(1, x / rect.width));
+
+    // Set time based on percentage of selected duration
+    const newTime = Math.round(percentage * selectedDuration * 60);
+    handleTimeChange(newTime);
   };
 
   // Create timeDisplay for the overlay
@@ -411,48 +533,160 @@ export function FocusPage() {
               {/* Timer Setup Mode */}
               {isSetupMode ? (
                 <div className="text-center">
-                  <h3 className="text-xl font-semibold mb-6">Setup Focus Timer</h3>
+                  <h3 className="text-xl font-semibold mb-2">Pomodoro Timer Setup</h3>
+                  <p className="text-sm text-muted-foreground mb-6">Configure your focus sessions and breaks</p>
 
-                  <div className="mb-8 bg-gray-50 rounded-lg p-4">
-                    <label className="block text-sm font-medium text-foreground mb-3">
-                      Focus Duration (minutes)
+                  {/* Pomodoro Cycle Display */}
+                  <div className="mb-6 bg-teal-50 rounded-lg p-4 border border-teal-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium text-teal-700">Session Cycles</span>
+                      <div className="flex gap-1">
+                        {Array.from({ length: totalCycles }, (_, i) => (
+                          <div
+                            key={i}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                              i === 0
+                                ? 'bg-teal-500 text-white'
+                                : i % 4 === 3
+                                ? 'bg-purple-500 text-white'
+                                : 'bg-blue-500 text-white'
+                            }`}
+                          >
+                            {i + 1}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center gap-4 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-teal-500 rounded-full"></div>
+                        <span>Focus</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span>Short Break</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                        <span>Long Break</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Professional Draggable Timer */}
+                  <div className="mb-8 bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+                    <label className="block text-sm font-medium text-foreground mb-4">
+                      Focus Duration: {formatTime(time)}
                     </label>
+
+                    <div
+                      ref={timerRef}
+                      className="relative h-12 bg-gray-100 rounded-lg mb-4 cursor-pointer group"
+                      onMouseDown={(e) => {
+                        if (!isRunning) {
+                          setIsDragging(true);
+                          handleTimerDrag(e.clientX);
+                        }
+                      }}
+                    >
+                      {/* Progress Background */}
+                      <div className="absolute inset-0 bg-gray-200 rounded-lg"></div>
+
+                      {/* Progress Fill */}
+                      <div
+                        className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-400 to-teal-500 rounded-lg transition-all duration-200"
+                        style={{ width: `${((selectedDuration * 60 - time) / (selectedDuration * 60)) * 100}%` }}
+                      ></div>
+
+                      {/* Draggable Thumb */}
+                      {!isRunning && (
+                        <div
+                          className="absolute w-6 h-6 bg-white border-2 border-teal-500 rounded-full shadow-lg cursor-grab active:cursor-grabbing hover:scale-110 transition-all"
+                          style={{
+                            left: `${((selectedDuration * 60 - time) / (selectedDuration * 60)) * 100}%`,
+                            top: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            zIndex: 10
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-teal-500 rounded-full animate-ping opacity-20"></div>
+                        </div>
+                      )}
+
+                      {/* Time Hover Display */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-teal-600 transition-colors">
+                          {Math.ceil((selectedDuration * 60 - time) / 60)} min
+                        </span>
+                      </div>
+
+                      {/* Hover Time Selector Box */}
+                      <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <div className="flex flex-col gap-1">
+                          <div>Focus: {selectedDuration} min</div>
+                          <div>Short Break: 5 min</div>
+                          <div>Long Break: 15 min</div>
+                          <div className="text-teal-400 pt-1 border-t border-gray-700">
+                            Total: {Math.ceil(getTotalSessionTime() / 60)} min
+                          </div>
+                        </div>
+                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                      </div>
+                    </div>
+
+                    {/* Quick Time Buttons */}
                     <div className="flex justify-center gap-2 mb-4">
                       {[15, 25, 45, 60].map((minutes) => (
                         <button
                           key={minutes}
-                          onClick={() => setSelectedDuration(minutes)}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          onClick={() => {
+                            setSelectedDuration(minutes);
+                            setTime(minutes * 60);
+                          }}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
                             selectedDuration === minutes
-                              ? 'bg-teal-400 text-foreground'
-                              : 'bg-gray-50 text-foreground hover:bg-gray-100'
+                              ? 'bg-teal-500 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          {minutes}
+                          {minutes}m
                         </button>
                       ))}
                     </div>
-                    <input
-                      type="range"
-                      min="5"
-                      max="180"
-                      value={selectedDuration}
-                      onChange={(e) => setSelectedDuration(Number(e.target.value))}
-                      className="w-full max-w-xs mx-auto"
-                    />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Selected: {selectedDuration} minutes
-                    </p>
+
+                    {/* Visual Timeline */}
+                    <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+                      {Array.from({ length: totalCycles }, (_, i) => {
+                        const sessionWidth = 100 / totalCycles;
+                        const isLongBreak = i % 4 === 3 && i < totalCycles - 1;
+                        return (
+                          <div key={i} className="absolute h-full flex">
+                            <div
+                              className="bg-teal-400"
+                              style={{ width: `${sessionWidth * 0.8}%` }}
+                            ></div>
+                            {i < totalCycles - 1 && (
+                              <div
+                                className={`bg-${isLongBreak ? 'purple' : 'blue'}-400`}
+                                style={{ width: `${sessionWidth * 0.2}%` }}
+                              ></div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <Button
                     onClick={() => {
                       setTime(selectedDuration * 60);
+                      setPomodoroType('focus');
+                      setCurrentCycle(1);
                       setIsSetupMode(false);
                     }}
-                    className="w-full max-w-xs rounded-2xl bg-teal-400 hover:bg-teal-500 py-6"
+                    className="w-full max-w-xs rounded-2xl bg-teal-400 hover:bg-teal-500 py-6 font-semibold shadow-lg hover:shadow-xl transition-all"
                   >
-                    Start Focus Timer
+                    Start Pomodoro Session
                   </Button>
                 </div>
               ) : (
@@ -466,29 +700,54 @@ export function FocusPage() {
                             cx="50%"
                             cy="50%"
                             r="45%"
-                            stroke="teal-200"
-                            strokeWidth="12"
+                            stroke={
+                              pomodoroType === 'focus' ? '#14b8a6' :
+                              pomodoroType === 'shortBreak' ? '#3b82f6' : '#a855f7'
+                            }
+                            strokeWidth="8"
                             fill="none"
+                            opacity="0.2"
                           />
                           <circle
                             cx="50%"
                             cy="50%"
                             r="45%"
-                            stroke="teal-400"
-                            strokeWidth="12"
+                            stroke={
+                              pomodoroType === 'focus' ? '#14b8a6' :
+                              pomodoroType === 'shortBreak' ? '#3b82f6' : '#a855f7'
+                            }
+                            strokeWidth="8"
                             fill="none"
-                            strokeDasharray={`${((selectedDuration * 60 - time) / (selectedDuration * 60)) * (2 * Math.PI * 45)} ${2 * Math.PI * 45}`}
+                            strokeDasharray={`${getCurrentSessionProgress() * (2 * Math.PI * 45) / 100} ${2 * Math.PI * 45}`}
                             className="transition-all duration-1000"
                             strokeLinecap="round"
                           />
                         </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
                           <div className="text-center">
-                            <p className="text-5xl mb-2">{formatTime(time)}</p>
+                            {/* Session Type Badge */}
+                            <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-3 ${
+                              pomodoroType === 'focus' ? 'bg-teal-100 text-teal-700' :
+                              pomodoroType === 'shortBreak' ? 'bg-blue-100 text-blue-700' :
+                              'bg-purple-100 text-purple-700'
+                            }`}>
+                              {pomodoroType === 'focus' ? '🎯 Focus' :
+                               pomodoroType === 'shortBreak' ? '☕ Short Break' : '🌟 Long Break'}
+                            </div>
+
+                            {/* Timer Display */}
+                            <p className="text-5xl font-bold mb-2">{formatTime(time)}</p>
+
+                            {/* Cycle Progress */}
+                            <div className="text-xs text-muted-foreground mb-2">
+                              Cycle {currentCycle} of {totalCycles}
+                            </div>
+
+                            {/* Session Status */}
                             <p className="text-sm text-muted-foreground">
-                              {time === 0 ? "Focus Time Complete!" :
-                               isSetupMode ? "Set your focus time" :
-                               "Focus in progress"}
+                              {time === 0 ? "Session Complete!" :
+                               isRunning ? `${pomodoroType === 'focus' ? 'Focus' : 'Break'} in progress` :
+                               `${pomodoroType === 'focus' ? 'Focus' : 'Break'} paused`}
                             </p>
                           </div>
                         </div>

@@ -52,6 +52,11 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
     };
 
     const handleLoadedMetadata = () => {
+      console.log('Audio loaded metadata:', {
+        duration: audio.duration,
+        src: audio.src,
+        readyState: audio.readyState
+      });
       if (audio.duration) {
         setDuration(audio.duration);
       }
@@ -368,15 +373,18 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
             {/* Always visible thumb when track is loaded */}
             {(duration > 0) && (
               <div
-                className="absolute w-4 h-4 bg-teal-500 rounded-full shadow-lg border-2 border-teal-600 z-10 hover:bg-teal-400 cursor-pointer transition-none"
+                className="absolute w-4 h-4 rounded-full shadow-lg z-20 hover:scale-110 cursor-pointer transition-all"
                 style={{
+                  backgroundColor: '#ff0000',
+                  border: '2px solid #cc0000',
                   left: `${duration > 0 ? Math.max(0, Math.min(100, (currentTime / duration) * 100)) : 0}%`,
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)'
+                  top: '0px',
+                  transform: 'translateX(-50%)'
                 }}
+                title={`Thumb: ${Math.round(currentTime)}s / ${Math.round(duration)}s (${Math.round((currentTime/duration)*100)}%)`}
               />
             )}
-          </div>
+              </div>
         </div>
 
         {/* Volume Control */}
