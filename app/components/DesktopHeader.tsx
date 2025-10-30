@@ -16,7 +16,6 @@ interface DesktopHeaderProps {
 export function DesktopHeader({ userName, points, level = 5, onNavigate }: DesktopHeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDailyHovered, setIsDailyHovered] = useState(false);
-  const [isPetHovered, setIsPetHovered] = useState(false);
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -67,33 +66,34 @@ export function DesktopHeader({ userName, points, level = 5, onNavigate }: Deskt
       <div className="flex items-center gap-6">
         {/* Daily Progress */}
         <div
-          className="hidden lg:flex items-center gap-3 px-4 py-2 bg-[var(--teal-50)] rounded-2xl cursor-pointer"
+          className="relative hidden lg:flex flex-col z-10"
           onMouseEnter={() => setIsDailyHovered(true)}
           onMouseLeave={() => setIsDailyHovered(false)}
+          onClick={() => onNavigate?.('missions')}
         >
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground">
-                {isDailyHovered ? 'Daily Goal' : 'Daily'}
-              </span>
-              <span className="text-xs">3/5 lessons</span>
-            </div>
-            <div className="relative h-1.5 w-32 overflow-hidden">
-              {isPetHovered ? (
-                <div className="absolute inset-0 flex items-center justify-center text-2xl transition-all duration-300">
-                  🐱
-                </div>
-              ) : (
-                <Progress value={60} className="transition-all duration-300" />
-              )}
-            </div>
+          <div className="flex items-center gap-3 px-4 py-2 bg-[var(--teal-50)] rounded-2xl cursor-pointer relative z-20">
+            <span className="text-sm font-medium">Daily Goal</span>
           </div>
-          {/* Pet Icon Hover Area */}
-          <div
-            className="absolute -right-2 top-0 h-full w-8"
-            onMouseEnter={() => setIsPetHovered(true)}
-            onMouseLeave={() => setIsPetHovered(false)}
-          />
+
+          {/* Hover Details Box */}
+          {isDailyHovered && (
+            <div className="absolute top-full mt-8 left-1/2 transform -translate-x-1/2 w-64 bg-white border border-border rounded-lg shadow-lg p-4 z-0">
+              <div className="space-y-15">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Today's Progress</span>
+                  <span className="text-xs text-muted-foreground">60%</span>
+                </div>
+                <Progress value={60} className="h-2" />
+                <div className="text-xs text-muted-foreground">
+                  Complete 2 more lessons to reach your daily goal!
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-2xl">🐱</span>
+                  <span>Your pet is waiting for you!</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Points */}
