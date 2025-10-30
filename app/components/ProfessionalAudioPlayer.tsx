@@ -350,9 +350,9 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
             value={duration > 0 ? (currentTime / duration) * 100 : 0}
             className="h-2"
           />
-          {/* Custom Progress Bar - Fixed positioning */}
+          {/* Custom Progress Bar - Simplified with proper thumb */}
           <div
-            className="relative w-full h-2 bg-gray-200 rounded-lg cursor-pointer mt-1 group"
+            className="relative w-full h-2 bg-gray-200 rounded-lg cursor-pointer group"
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const x = e.clientX - rect.left;
@@ -370,21 +370,19 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
               className="absolute left-0 top-0 h-full bg-teal-500 rounded-lg transition-all duration-100"
               style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
             />
-            {/* Always visible thumb when track is loaded */}
+            {/* Always visible thumb when track is loaded - properly centered */}
             {(duration > 0) && (
               <div
-                className="absolute w-4 h-4 rounded-full shadow-lg z-20 hover:scale-110 cursor-pointer transition-all"
+                className="absolute w-4 h-4 bg-teal-600 border-2 border-white rounded-full shadow-lg z-20 hover:scale-110 cursor-pointer transition-all"
                 style={{
-                  backgroundColor: '#ff0000',
-                  border: '2px solid #cc0000',
                   left: `${duration > 0 ? Math.max(0, Math.min(100, (currentTime / duration) * 100)) : 0}%`,
-                  top: '0px',
-                  transform: 'translateX(-50%)'
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)'
                 }}
-                title={`Thumb: ${Math.round(currentTime)}s / ${Math.round(duration)}s (${Math.round((currentTime/duration)*100)}%)`}
+                title={`${formatTime(currentTime)} / ${formatTime(duration)}`}
               />
             )}
-              </div>
+          </div>
         </div>
 
         {/* Volume Control */}

@@ -595,7 +595,7 @@ export function FocusPage() {
                       {/* Progress Fill */}
                       <div
                         className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-400 to-teal-500 rounded-lg transition-all duration-200"
-                        style={{ width: `${((selectedDuration * 60 - time) / (selectedDuration * 60)) * 100}%` }}
+                        style={{ width: `${(time / (selectedDuration * 60)) * 100}%` }}
                       ></div>
 
                       {/* Draggable Thumb */}
@@ -603,20 +603,24 @@ export function FocusPage() {
                         <div
                           className="absolute w-6 h-6 bg-white border-2 border-teal-500 rounded-full shadow-lg cursor-grab active:cursor-grabbing hover:scale-110 transition-all"
                           style={{
-                            left: `${((selectedDuration * 60 - time) / (selectedDuration * 60)) * 100}%`,
+                            left: `${(time / (selectedDuration * 60)) * 100}%`,
                             top: '50%',
                             transform: 'translate(-50%, -50%)',
                             zIndex: 10
                           }}
                         >
                           <div className="absolute inset-0 bg-teal-500 rounded-full animate-ping opacity-20"></div>
+                          {/* Time display inside thumb */}
+                          <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-teal-600">
+                            {Math.ceil(time / 60)}m
+                          </div>
                         </div>
                       )}
 
                       {/* Time Hover Display */}
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-700 group-hover:text-teal-600 transition-colors">
-                          {Math.ceil((selectedDuration * 60 - time) / 60)} min
+                          {Math.ceil(time / 60)} min
                         </span>
                       </div>
 
