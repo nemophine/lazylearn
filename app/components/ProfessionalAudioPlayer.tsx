@@ -346,14 +346,14 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
               className="absolute left-0 top-0 h-full bg-teal-500 rounded-lg transition-all duration-100"
               style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
             />
-            {/* Always visible thumb during playback */}
-            {(currentTime > 0 || isPlaying) && (
+            {/* Always visible thumb when track is loaded */}
+            {(duration > 0) && (
               <div
                 className="absolute w-3 h-3 bg-teal-600 rounded-full shadow-lg border-2 border-white z-10 transition-all duration-100"
                 style={{
-                  left: `max(8px, min(calc(100% - 8px), ${duration > 0 ? (currentTime / duration) * 100 : 0}%))`,
+                  left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
                   top: '50%',
-                  transform: 'translateX(-50%) translateY(-50%)'
+                  transform: 'translate(-50%, -50%)'
                 }}
               />
             )}
