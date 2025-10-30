@@ -34,8 +34,8 @@ export function Progress({
       {...props}
     >
       <div
-        className="h-full w-full origin-left rounded-full bg-primary transition-transform"
-        style={{ transform: `scaleX(${percentage / 100})` }}
+        className="h-full rounded-full bg-primary transition-all duration-300"
+        style={{ width: `${percentage}%` }}
       />
     </div>
   );
