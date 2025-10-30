@@ -77,7 +77,8 @@ export class AuthService {
   // Generate JWT token
   private static generateToken(userId: string): string {
     const payload = { userId };
-    return jwt.sign(payload, this.JWT_SECRET, {
+    // Use type assertion to bypass JWT typing issues
+    return (jwt as any).sign(payload, this.JWT_SECRET, {
       expiresIn: this.JWT_EXPIRES_IN,
     });
   }
