@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Repeat } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Repeat, Square } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 
@@ -17,9 +17,21 @@ interface ProfessionalAudioPlayerProps {
   track: AudioTrack;
   isSelected: boolean;
   onSelect: () => void;
+  onPreviousTrack?: () => void;
+  onNextTrack?: () => void;
+  hasPreviousTrack?: boolean;
+  hasNextTrack?: boolean;
 }
 
-export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }: ProfessionalAudioPlayerProps) {
+export default function ProfessionalAudioPlayer({
+  track,
+  isSelected,
+  onSelect,
+  onPreviousTrack,
+  onNextTrack,
+  hasPreviousTrack = false,
+  hasNextTrack = false
+}: ProfessionalAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(false);
@@ -66,7 +78,8 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
 
     const handleError = (e: Event) => {
       console.error('Audio error:', e);
-      setError('Unable to load audio. Try selecting another track.');
+      // Don't show error for now - just log it to console
+      // setError('Unable to load audio. Try selecting another track.');
       setIsLoading(false);
       setIsPlaying(false);
     };
@@ -216,9 +229,7 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
         setIsLoading(true);
         setError(null);
 
-        // Reset audio to start
-        audio.currentTime = 0;
-
+        // Don't reset audio - continue from current position
         // Try to play
         try {
           await audio.play();
@@ -284,6 +295,26 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
     }
   };
 
+  const restartSong = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.currentTime = 0;
+      setCurrentTime(0);
+    }
+  };
+
+  const playPreviousTrack = () => {
+    if (onPreviousTrack && hasPreviousTrack) {
+      onPreviousTrack();
+    }
+  };
+
+  const playNextTrack = () => {
+    if (onNextTrack && hasNextTrack) {
+      onNextTrack();
+    }
+  };
+
   // Stop playing when track is deselected
   useEffect(() => {
     if (!isSelected && audioRef.current) {
@@ -336,49 +367,86 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
       isSelected ? 'border-teal-400' : 'border-gray-200'
     }`}>
       <div className="p-4">
-        {/* Track Info */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={togglePlayPause}
-              className="text-teal-600 hover:text-teal-700 transition-colors"
-            >
-              {isPlaying ? (
-                <Pause className="w-5 h-5" />
-              ) : (
-                <Play className="w-5 h-5" />
-              )}
-            </button>
-            <div>
-              <h3 className="font-semibold text-gray-900">{track.title}</h3>
-              <p className="text-sm text-gray-500">{track.mood}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={skipBackward}
-              className="p-1 text-gray-600 hover:text-gray-900 transition-colors"
-              title="Skip back 10s"
-            >
-              <SkipBack className="w-4 h-4" />
-            </button>
-            <button
-              onClick={skipForward}
-              className="p-1 text-gray-600 hover:text-gray-900 transition-colors"
-              title="Skip forward 10s"
-            >
-              <SkipForward className="w-4 h-4" />
-            </button>
-            <button
-              onClick={toggleLoop}
-              className={`p-1 transition-colors ${
-                isLooping ? 'text-teal-600' : 'text-gray-600 hover:text-gray-900'
-              }`}
-              title="Toggle loop"
-            >
-              <Repeat className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Track Info - Name and Feel */}
+        <div className="mb-4">
+          <h3 className="font-semibold text-gray-900 text-lg mb-1">{track.title}</h3>
+          <p className="text-sm text-gray-500">{track.mood}</p>
+        </div>
+
+      {/* Control Buttons - Loop Arrow, Play Arrow, Restart */}
+        <div className="flex items-center justify-center gap-2 mb-4">
+          {/* Loop Toggle */}
+          <button
+            onClick={toggleLoop}
+            className={`p-3 transition-all rounded-full hover:bg-gray-100 flex items-center justify-center relative hover:shadow-md active:shadow-lg active:scale-95 ${
+              isLooping
+                ? 'text-teal-600 bg-teal-50 ring-2 ring-teal-500'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+            title={isLooping ? "Looping ON - Click to disable" : "Looping OFF - Click to enable"}
+          >
+            <Repeat className="w-5 h-5" />
+            {isLooping && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-teal-500 rounded-full flex items-center justify-center">
+                <div className="w-full h-full bg-teal-600 rounded-full animate-pulse"></div>
+              </div>
+            )}
+          </button>
+
+          {/* Previous Track Arrow */}
+          <button
+            onClick={playPreviousTrack}
+            disabled={!hasPreviousTrack}
+            className={`p-3 transition-all rounded-full hover:bg-gray-100 flex items-center justify-center hover:shadow-md active:shadow-lg active:scale-95 ${
+              hasPreviousTrack
+                ? 'text-gray-700 hover:text-gray-900'
+                : 'text-gray-300 cursor-not-allowed'
+            }`}
+            title={hasPreviousTrack ? "Previous track" : "No previous track"}
+          >
+            <SkipBack className="w-5 h-5" />
+          </button>
+
+          {/* Play/Pause - Enhanced Design */}
+          <button
+            onClick={togglePlayPause}
+            className="p-4 bg-gradient-to-br from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 transition-all rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 flex items-center justify-center"
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            )}
+          </button>
+
+          {/* Next Track Arrow */}
+          <button
+            onClick={playNextTrack}
+            disabled={!hasNextTrack}
+            className={`p-3 transition-all rounded-full hover:bg-gray-100 flex items-center justify-center hover:shadow-md active:shadow-lg active:scale-95 ${
+              hasNextTrack
+                ? 'text-gray-700 hover:text-gray-900'
+                : 'text-gray-300 cursor-not-allowed'
+            }`}
+            title={hasNextTrack ? "Next track" : "No next track"}
+          >
+            <SkipForward className="w-5 h-5" />
+          </button>
+
+          {/* Restart */}
+          <button
+            onClick={restartSong}
+            className="p-3 text-gray-600 hover:text-gray-900 transition-all rounded-full hover:bg-gray-100 flex items-center justify-center hover:shadow-md active:shadow-lg active:scale-95"
+            title="Restart song"
+          >
+            <Square className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Progress Bar */}

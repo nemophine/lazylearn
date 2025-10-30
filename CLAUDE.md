@@ -131,6 +131,55 @@ Before committing any changes, Claude must:
 
 **Never commit changes without thorough UI/UX testing**
 
+## UI State Management & Visual Feedback Guidelines
+
+**KEEP UI ALWAYS INFORMATIVE AND DESCRIPTIVE**
+
+### Component State Visualization
+Every component must clearly show its current state to users:
+
+1. **Different Visual States**:
+   - **On/Off States**: Use clear visual differences (colors, icons, text)
+   - **Active/Inactive**: Show when features are enabled vs disabled
+   - **Loading States**: Display progress indicators or loading messages
+   - **Error States**: Show clear error messages and recovery options
+   - **Success States**: Provide confirmation when actions complete
+
+2. **Descriptive Labels & Status**:
+   - **Button States**: "Play" → "Pause", "Start" → "Stop", "Enable" → "Disable"
+   - **Progress Indicators**: Show percentages, time remaining, steps completed
+   - **Status Messages**: "Loading...", "Ready", "Error: Please try again"
+   - **Tooltips**: Provide helpful hints on hover for all interactive elements
+
+3. **Navigation Guidance**:
+   - **Current Location**: Clearly highlight which page/section user is on
+   - **Next Steps**: Guide users on what to do next
+   - **Available Actions**: Show what options are currently available
+   - **Disabled States**: Explain why certain features are unavailable
+
+4. **Visual Feedback for Actions**:
+   - **Hover States**: Show elements are clickable
+   - **Click Feedback**: Provide immediate visual response
+   - **Transitions**: Smooth animations for state changes
+   - **Loading Feedback**: Show when operations are in progress
+
+### Audio Player Specific Requirements:
+- **Play/Pause State**: Clear visual difference between play and pause icons
+- **Track Information**: Always show current track name and artist
+- **Progress**: Show both time elapsed and total duration
+- **Volume Level**: Display current volume percentage
+- **Loop Status**: Indicate when repeat is enabled
+- **Track Navigation**: Show when previous/next tracks are available
+
+### Color Coding for States:
+- **Green/Teal**: Active, enabled, success states
+- **Gray**: Inactive, disabled, unavailable states
+- **Red**: Error states, warnings
+- **Blue**: Information, loading states
+- **White/Light**: Content, text, inactive elements
+
+**Users should never have to guess what state a component is in or what actions are available**
+
 ## Development Tips
 
 - When adding new pages, update the `DesktopSidebar.tsx` navigation

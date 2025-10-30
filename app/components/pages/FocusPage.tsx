@@ -147,33 +147,52 @@ export function FocusPage() {
   const focusTracks = [
     {
       title: 'Ocean Choir Meditation 🌊',
-      duration: '10:00',
+      duration: '8:23',
       mood: 'Calm & Peaceful',
       file: '/audio/focus/ocean-choir-meditation-8234.mp3',
       source: 'Local File',
       status: 'Ready to Play'
     },
     {
-      title: 'Forest Rain',
-      duration: '10:00',
-      mood: 'Relaxing Nature',
-      file: '/audio/focus/ocean-waves.mp3',
-      status: 'Ready to Play'
-    },
-    {
-      title: 'Meditation Music',
-      duration: '10:00',
+      title: 'Relax Meditation Music 🎵',
+      duration: '4:24',
       mood: 'Deep Focus',
-      file: '/audio/focus/test-silence.mp3',
+      file: '/audio/focus/relax-meditation-music-424572.mp3',
+      source: 'Local File',
       status: 'Ready to Play'
     },
     {
-      title: 'Soft Piano',
-      duration: '10:00',
+      title: 'Lo-Fi Ambient with Rain 🌧️',
+      duration: '3:45',
       mood: 'Concentration',
-      file: '/audio/focus/ocean-waves.mp3',
+      file: '/audio/focus/lo-fi-ambient-music-with-gentle-rain-sounds-377059.mp3',
+      source: 'Local File',
       status: 'Ready to Play'
     },
+    {
+      title: 'Forest Rain Ambient 🌲',
+      duration: '3:52',
+      mood: 'Relaxing Nature',
+      file: '/audio/focus/ambient-forest-rain-375365.mp3',
+      source: 'Local File',
+      status: 'Ready to Play'
+    },
+    {
+      title: 'Perfect Beauty 🎶',
+      duration: '4:51',
+      mood: 'Peaceful',
+      file: '/audio/focus/perfect-beauty-191271.mp3',
+      source: 'Local File',
+      status: 'Ready to Play'
+    },
+    {
+      title: 'Traditional Chinese Music 🎋',
+      duration: '2:35',
+      mood: 'Cultural Focus',
+      file: '/audio/focus/smooth-as-silk-full-version-traditional-chinese-music-383307.mp3',
+      source: 'Local File',
+      status: 'Ready to Play'
+    }
   ];
 
   const friendsInFocus = [
@@ -1035,6 +1054,10 @@ export function FocusPage() {
               track={focusTracks[selectedMusic]}
               isSelected={true}
               onSelect={() => {}}
+              onPreviousTrack={() => setSelectedMusic(Math.max(0, selectedMusic - 1))}
+              onNextTrack={() => setSelectedMusic(Math.min(focusTracks.length - 1, selectedMusic + 1))}
+              hasPreviousTrack={selectedMusic > 0}
+              hasNextTrack={selectedMusic < focusTracks.length - 1}
             />
           </div>
         </div>
