@@ -282,13 +282,10 @@ export function CommunityPage() {
                 <Send className="w-4 h-4 ml-2" />
               </Button>
             </div>
-<<<<<<< Updated upstream
-=======
-            <Button className="rounded-full bg-blue text-foreground hover:bg-white/90">
+          <Button className="rounded-full bg-blue text-foreground hover:bg-white/90">
               <MessageCircle className="w-4 h-4 mr-2" />
               Chat
             </Button>
->>>>>>> Stashed changes
           </div>
         </CardContent>
       </Card>
