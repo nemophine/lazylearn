@@ -1,17 +1,17 @@
 'use client';
 
-import { 
-  Home, 
-  Focus, 
-  Target, 
-  Gift, 
+import {
+  Home,
+  Focus,
+  Target,
+  Gift,
   User,
-  Search, 
-  Video, 
-  Gamepad2, 
-  GraduationCap, 
-  MessageSquare, 
-  BarChart3, 
+  Search,
+  Video,
+  Gamepad2,
+  GraduationCap,
+  MessageSquare,
+  BarChart3,
   Award,
   BookOpen,
   DollarSign,
@@ -80,6 +80,7 @@ interface NavSectionProps {
   onNavigate: (page: string) => void;
 }
 
+<<<<<<< HEAD
 function NavSection({
   title,
   items,
@@ -89,6 +90,58 @@ function NavSection({
   onNavigate,
 }: NavSectionProps) {
   return (
+=======
+export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  const mainNavItems = [
+    { id: 'home', icon: Home, label: 'Home' },
+    { id: 'focus', icon: Focus, label: 'Focus Mode' },
+    { id: 'missions', icon: Target, label: 'Missions' },
+    { id: 'reward', icon: Gift, label: 'Rewards' },
+    { id: 'profile', icon: User, label: 'Profile' },
+  ];
+
+  const learningItems = [
+    { id: 'courses', icon: BookOpen, label: 'Courses' },
+    { id: 'game', icon: Gamepad2, label: 'Games & Quiz' },
+    { id: 'search', icon: Search, label: 'Search' },
+    { id: 'teacher', icon: GraduationCap, label: 'Line Teacher' },
+  ];
+
+  const communityItems = [
+    { id: 'community', icon: MessageSquare, label: 'Community' },
+    { id: 'cartoon', icon: Smile, label: 'Cartoon Corner' },
+  ];
+
+  const otherItems = [
+    { id: 'analysis', icon: BarChart3, label: 'Analysis' },
+    { id: 'certificate', icon: Award, label: 'Certificates' },
+    { id: 'interaction', icon: Calendar, label: 'Schedule' },
+    { id: 'donation', icon: DollarSign, label: 'Support Us' },
+  ];
+
+  const NavItem = ({ item }: { item: typeof mainNavItems[0] }) => {
+    const Icon = item.icon;
+    const isActive = activePage === item.id;
+    
+    return (
+      <button
+        onClick={() => onNavigate(item.id)}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
+          isActive 
+            ? 'bg-[var(--teal-400)] text-white shadow-md' 
+            : 'text-foreground hover:bg-[var(--teal-50)]'
+        }`}
+      >
+        <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+        {isExpanded && <span className="truncate">{item.label}</span>}
+      </button>
+    );
+  };
+
+  const NavSection = ({ title, items }: { title: string; items: typeof mainNavItems }) => (
+>>>>>>> schedule-feature
     <div className="mb-6">
       {isExpanded && (
         <h4 className="px-4 mb-2 text-xs text-muted-foreground uppercase tracking-wide">
