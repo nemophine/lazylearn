@@ -1,96 +1,34 @@
 'use client';
 
-<<<<<<< Updated upstream
-import { useState, useEffect, useMemo } from 'react';
-import { Play, Pause, RotateCcw, Lock, Unlock, Users, ChevronDown, Flame, Music } from 'lucide-react';
-=======
 import { useState, useEffect } from 'react';
-import { Play, Pause, Lock, Unlock, Users, RefreshCw, ChevronDown, Flame, Music } from 'lucide-react';
->>>>>>> Stashed changes
+import { Play, Pause, Lock, Unlock, Users, RefreshCw, ChevronDown, Flame, Music, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui/dropdown-menu';
 import { Progress } from '../ui/progress';
 import { Badge } from '../ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-<<<<<<< Updated upstream
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { useFocusMode } from '../../state/focus-mode-context';
-=======
+
+// Import our focus utilities
+import { Pet, loadPetData, savePetData, createDefaultPet, updateFocusStats } from '../../focus/utils/localStorage';
+import { PET_CONFIGS } from '../../focus/types/pet';
 
 // Import Audio Player
 import AudioPlayer from '../AudioPlayer';
-import ProfessionalAudioPlayer from '../ProfessionalAudioPlayer';
-import FocusFloatingButton from '../FocusFloatingButton';
 
-// Simple Pet interface instead of import
-interface Pet {
-  id: string;
-  name: string;
-  type: string;
-  level: number;
-  health: number;
-  hunger: number;
-  energy: number;
-  clean: number;
-  happy: number;
-  exp: number;
-  lastFed: string;
-}
-
-// Simple pet functions instead of imports
-const loadPetData = (): Pet | null => {
-  if (typeof window === 'undefined') return null;
-  const data = localStorage.getItem('focusPet');
-  return data ? JSON.parse(data) : null;
-};
-
-const savePetData = (pet: Pet): void => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('focusPet', JSON.stringify(pet));
-};
-
-const createDefaultPet = (): Pet => ({
-  id: 'pet-' + Date.now(),
-  name: 'Whiskers',
-  type: 'cat',
-  level: 1,
-  health: 100,
-  hunger: 100,
-  energy: 100,
-  clean: 100,
-  happy: 100,
-  exp: 0,
-  lastFed: new Date().toISOString()
-});
-
-const updateFocusStats = (pet: Pet, timeMinutes: number): Pet => ({
-  ...pet,
-  exp: pet.exp + Math.floor(timeMinutes / 10)
-});
-
->>>>>>> Stashed changes
 
 export function FocusPage() {
-  const focusSource = 'focus-session';
-  const { isFocusMode, reason, enterFocusMode, exitFocusMode } = useFocusMode();
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(25 * 60); // Default 25 minutes in seconds
   const [selectedDuration, setSelectedDuration] = useState(25); // minutes
   const [isSetupMode, setIsSetupMode] = useState(true);
   const [selectedMusic, setSelectedMusic] = useState(0);
+  const [petMood, setPetMood] = useState('happy');
   const [isLocked, setIsLocked] = useState(false);
-<<<<<<< Updated upstream
-  const [selectedPet] = useState({ emoji: '🐱', name: 'Whiskers', level: 5, mood: 'Happy' });
-  const [showInviteFriends, setShowInviteFriends] = useState(false);
-  const [showRelaxMode, setShowRelaxMode] = useState(false);
-  const [unlockClicks, setUnlockClicks] = useState(0);
-=======
   const [currentPet, setCurrentPet] = useState<Pet | null>(null);
-  const [todaySessions, setTodaySessions] = useState<{completed: boolean, duration: number}[]>([]);
->>>>>>> Stashed changes
+  const [stats, setStats] = useState({ totalFocusTime: 0, sessionsCompleted: 0, currentStreak: 0 });
+  const [todaySessions, setTodaySessions] = useState<{completed: boolean, duration: number}[]>([]); // Store sessions with completion status and duration
 
   // Load pet and stats on mount
   useEffect(() => {
@@ -100,21 +38,13 @@ export function FocusPage() {
     }
     setCurrentPet(pet);
 
-    // Load today's sessions
-    const today = new Date().toISOString().split('T')[0];
-    const storedData = localStorage.getItem('today_sessions');
-
-    if (storedData) {
-      const data = JSON.parse(storedData);
-      if (data.date === today) {
-        setTodaySessions(data.sessions);
-      } else {
-        localStorage.removeItem('today_sessions');
-        setTodaySessions([]);
-      }
-    } else {
-      setTodaySessions([]);
-    }
+    // Load stats
+    const statsData = {
+      totalFocusTime: 0,
+      sessionsCompleted: 0,
+      currentStreak: 0
+    };
+    setStats(statsData);
   }, []);
 
   // Update pet display based on real pet data
@@ -123,7 +53,7 @@ export function FocusPage() {
       return { emoji: '🐱', name: 'Whiskers', level: 1, mood: 'Happy' };
     }
 
-    // Simple pet configuration instead of PET_CONFIGS
+    const config = PET_CONFIGS[currentPet.type];
     const averageStatus = (currentPet.health + currentPet.hunger + currentPet.energy + currentPet.clean + currentPet.happy) / 5;
 
     let mood = 'Happy';
@@ -132,18 +62,8 @@ export function FocusPage() {
     else if (averageStatus >= 40) mood = 'Content';
     else mood = 'Sleepy';
 
-    // Simple emoji mapping based on pet type
-    const petEmojis = {
-      cat: '🐱',
-      dog: '🐶',
-      fox: '🦊',
-      bear: '🐻',
-      rabbit: '🐰',
-      default: '🐱'
-    };
-
     return {
-      emoji: petEmojis[currentPet.type] || petEmojis.default,
+      emoji: config.emoji,
       name: currentPet.name,
       level: currentPet.level,
       mood
@@ -154,46 +74,19 @@ export function FocusPage() {
 
   const focusTracks = [
     {
-      title: 'Ocean Choir Meditation 🌊',
-      duration: '10:00',
+      title: 'Ocean Waves 🌊',
+      duration: '15:00',
       mood: 'Calm & Peaceful',
-      file: '/audio/focus/ocean-choir-meditation-8234.mp3',
+      file: '/audio/focus/ocean-waves.mp3',
       source: 'Local File',
-      status: 'Ready to Play'
+      status: 'Placeholder - Download real file needed'
     },
-    {
-      title: 'Forest Rain',
-      duration: '10:00',
-      mood: 'Relaxing Nature',
-      file: '/audio/focus/ocean-waves.mp3',
-      status: 'Ready to Play'
-    },
-    {
-      title: 'Meditation Music',
-      duration: '10:00',
-      mood: 'Deep Focus',
-      file: '/audio/focus/test-silence.mp3',
-      status: 'Ready to Play'
-    },
-    {
-      title: 'Soft Piano',
-      duration: '10:00',
-      mood: 'Concentration',
-      file: '/audio/focus/ocean-waves.mp3',
-      status: 'Ready to Play'
-    },
+    { title: 'Forest Rain', duration: '20:00', mood: 'Relaxing Nature', file: '/audio/focus/forest-rain.mp3', status: 'Coming Soon' },
+    { title: 'Piano Meditation', duration: '12:00', mood: 'Deep Focus', file: '/audio/focus/piano-meditation.mp3', status: 'Coming Soon' },
+    { title: 'Soft Jazz', duration: '18:00', mood: 'Creative Flow', file: '/audio/focus/soft-jazz.mp3', status: 'Coming Soon' },
+    { title: 'White Noise', duration: '30:00', mood: 'Background Focus', file: '/audio/focus/white-noise.mp3', status: 'Coming Soon' },
+    { title: 'Test Beep', duration: '0:01', mood: 'Test Audio', file: 'beep', status: 'Working' },
   ];
-<<<<<<< Updated upstream
-
-  const friendsInFocus = [
-    { name: 'Emma', pet: '🐱', time: '00:45:30', selected: false },
-    { name: 'Alex', pet: '🐶', time: '00:32:15', selected: false },
-    { name: 'Sarah', pet: '🦊', time: '01:12:00', selected: false },
-  ];
-
-  const [invitedFriends, setInvitedFriends] = useState<typeof friendsInFocus>([]);
-
-=======
   const availablePets = [
     { emoji: '🐱', name: 'Whiskers', level: 5, mood: 'Happy' },
     { emoji: '🐶', name: 'Buddy', level: 3, mood: 'Playful' },
@@ -201,7 +94,6 @@ export function FocusPage() {
     { emoji: '🐻', name: 'Teddy', level: 2, mood: 'Sleepy' },
   ];
 
->>>>>>> Stashed changes
   const currentCourse = {
     title: 'Advanced JavaScript Patterns',
     progress: 68,
@@ -224,7 +116,7 @@ export function FocusPage() {
       interval = setInterval(() => {
         setTime((prevTime) => {
           if (prevTime <= 1) {
-            // Timer completed!
+            // Session completed!
             handleSessionComplete();
             return 0;
           }
@@ -235,35 +127,113 @@ export function FocusPage() {
     return () => clearInterval(interval);
   }, [isRunning, isLocked, time]);
 
-  
-  
-  
-  // Calculate total time (always returns 0)
-  const getTodayTotalTime = () => {
-    return 0; // Always return 0 to display 00:00:00
-  };
-
-  // Get today's completed session count
-  const getTodaySessionCount = () => {
-    return todaySessions.filter(s => s.completed).length;
-  };
-
   const handleSessionComplete = () => {
     setIsRunning(false);
     setIsLocked(false);
 
-    // Add completed timer cycle as a session
+    // Add completed timer cycle to total time
+    const timerSession = { completed: false, duration: selectedDuration * 60 };
+    setTodaySessions(prev => [...prev, timerSession]);
+
+    // Save completed timer cycle
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('today_sessions', JSON.stringify({
+      date: today,
+      sessions: [...todaySessions, timerSession]
+    }));
+
+    console.log('⏰ Focus timer completed! Time added to Total Time.');
+  };
+
+  // New function to handle video lesson completion
+  const handleVideoLessonComplete = () => {
+    if (!currentPet) return;
+
+    // Update pet stats (bigger rewards for completing video lessons)
+    const duration = selectedDuration * 60;
+    const updatedPet = {
+      ...currentPet,
+      health: Math.min(100, currentPet.health + 10), // Bonus for completing lesson
+      hunger: Math.min(100, currentPet.hunger + 25), // Bonus for completing lesson
+      energy: Math.min(100, currentPet.energy + 15), // Bonus for completing lesson
+      clean: Math.min(100, currentPet.clean + 20), // Bonus for completing lesson
+      happy: Math.min(100, currentPet.happy + 15), // Bonus for completing lesson
+      exp: currentPet.exp + Math.floor(duration / 60) * 15, // Bonus XP for completing lesson
+      lastCare: new Date().toISOString()
+    };
+
+    // Check for level up
+    const expForNextLevel = updatedPet.level * 200;
+    if (updatedPet.exp >= expForNextLevel) {
+      updatedPet.level += 1;
+      updatedPet.exp = updatedPet.exp - expForNextLevel;
+      console.log(`🎉 Pet leveled up to level ${updatedPet.level}!`);
+    }
+
+    setCurrentPet(updatedPet);
+    savePetData(updatedPet);
+
+    // Add completed video session
     const sessionData = { completed: true, duration: selectedDuration * 60 };
     setTodaySessions(prev => [...prev, sessionData]);
 
-    // Save to localStorage
+    // Update focus stats
+    const newStats = updateFocusStats(selectedDuration * 60);
+    setStats(newStats);
+
+    // Save today's sessions to localStorage
     const today = new Date().toISOString().split('T')[0];
     localStorage.setItem('today_sessions', JSON.stringify({
       date: today,
       sessions: [...todaySessions, sessionData]
     }));
 
-    console.log('✅ Session completed!');
+    console.log('🎉 Video lesson completed! Session counted and pet stats updated!');
+  };
+
+  // Load today's sessions from localStorage
+  useEffect(() => {
+    const storedSessions = localStorage.getItem('today_sessions');
+    const today = new Date().toISOString().split('T')[0];
+
+    if (storedSessions) {
+      const parsed = JSON.parse(storedSessions);
+      if (parsed.date === today) {
+        // Handle different data formats for backward compatibility
+        if (parsed.sessions.length > 0) {
+          const firstSession = parsed.sessions[0];
+
+          if (typeof firstSession === 'number') {
+            // Old format: number array [1500, 1200] - convert to new format
+            setTodaySessions(parsed.sessions.map((duration: number) => ({ completed: false, duration })));
+          } else if (typeof firstSession === 'boolean') {
+            // Previous format: boolean array [true, true] - convert with default duration
+            setTodaySessions(parsed.sessions.map(() => ({ completed: false, duration: 25 * 60 })));
+          } else if (firstSession && typeof firstSession === 'object') {
+            // Current format: {completed: boolean, duration: number} array
+            setTodaySessions(parsed.sessions);
+          }
+        } else {
+          setTodaySessions([]);
+        }
+      } else {
+        // New day, clear old sessions
+        setTodaySessions([]);
+        localStorage.removeItem('today_sessions');
+      }
+    }
+  }, []);
+
+  // Get today's completed session count
+  const getTodaySessionCount = () => {
+    return todaySessions.filter(s => s.completed).length;
+  };
+
+  // Calculate total time only from completed timer cycles (when timer reaches 00:00)
+  const getTodayTotalTime = () => {
+    return todaySessions
+      .filter(session => !session.completed) // Only timer completions, not video completions
+      .reduce((total, session) => total + session.duration, 0);
   };
 
   // Handle timer start/pause
@@ -281,26 +251,10 @@ export function FocusPage() {
   };
 
   useEffect(() => {
-    if (isRunning && !isLocked) {
-      enterFocusMode(focusSource);
-    } else if (!isRunning && reason === focusSource) {
-      exitFocusMode();
-    }
-  }, [enterFocusMode, exitFocusMode, focusSource, isLocked, isRunning, reason]);
-
-  useEffect(() => {
-    return () => {
-      if (reason === focusSource) {
-        exitFocusMode();
-      }
-    };
-  }, [exitFocusMode, focusSource, reason]);
-
-  const petMood = useMemo(() => {
-    if (time > 1800) return 'excited';
-    if (time > 600) return 'happy';
-    if (time > 0) return 'content';
-    return 'sleepy';
+    if (time > 1800) setPetMood('excited');
+    else if (time > 600) setPetMood('happy');
+    else if (time > 0) setPetMood('content');
+    else setPetMood('sleepy');
   }, [time]);
 
   const formatTime = (seconds: number) => {
@@ -309,9 +263,6 @@ export function FocusPage() {
     const secs = seconds % 60;
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
-
-  // Create timeDisplay for the overlay
-  const timeDisplay = formatTime(time);
 
   const getPetAnimation = () => {
     switch (petMood) {
@@ -347,9 +298,7 @@ export function FocusPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="mb-1">Focus Mode 🎯</h2>
-          <p className="text-sm text-muted-foreground">
-            {isFocusMode ? 'Community alerts are muted until you pause.' : 'Stay focused with your virtual pet and relaxing ambience'}
-          </p>
+          <p className="text-sm text-muted-foreground">Stay focused with your virtual pet and relaxing ambience</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -357,12 +306,12 @@ export function FocusPage() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-400 to-teal-300 rounded-2xl text-white hover:shadow-lg hover:scale-105 transition-all duration-200">
+                <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[var(--teal-400)] to-[var(--teal-300)] rounded-2xl text-white hover:shadow-lg hover:scale-105 transition-all duration-200">
                   <Flame className="w-5 h-5" />
                   <span>{streakDays} days</span>
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-white border-teal-200 shadow-lg">
+              <TooltipContent side="bottom" className="bg-white border-[var(--teal-200)] shadow-lg">
                 <div className="text-center p-2">
                   <p className="mb-1">🔥 Day {streakDays} Streak!</p>
                   <p className="text-sm text-muted-foreground">{totalFocusMinutes} mins total</p>
@@ -376,12 +325,12 @@ export function FocusPage() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-300 to-teal-200 rounded-2xl">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[var(--teal-300)] to-[var(--teal-200)] rounded-2xl">
                   <span className="text-2xl">{selectedPet.emoji}</span>
                   <span className="text-foreground">{selectedPet.name}</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-white border-teal-200 shadow-lg">
+              <TooltipContent side="bottom" className="bg-white border-[var(--teal-200)] shadow-lg">
                 <div className="text-center p-2">
                   <p className="mb-1">{selectedPet.name}</p>
                   <p className="text-sm text-muted-foreground">Level {selectedPet.level}</p>
@@ -394,12 +343,12 @@ export function FocusPage() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-teal-300 to-teal-200 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200">
+              <button className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-[var(--teal-300)] to-[var(--teal-200)] rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200">
                 <ChevronDown className="w-4 h-4 text-foreground" />
               </button>
             </DropdownMenuTrigger>
             
-            <DropdownMenuContent align="end" className="w-48 bg-white border-teal-200 rounded-2xl shadow-lg">
+            <DropdownMenuContent align="end" className="w-48 bg-white border-[var(--teal-200)] rounded-2xl shadow-lg">
               <DropdownMenuItem className="rounded-xl cursor-pointer">
                 <span className="mr-2">🍖</span> Feed Pet
               </DropdownMenuItem>
@@ -415,7 +364,7 @@ export function FocusPage() {
       </div>
 
       {/* Course Progress Mini Card */}
-      <Card className="mb-6 bg-gradient-to-r from-teal-50 to-white border-teal-200">
+      <Card className="mb-6 bg-gradient-to-r from-[var(--teal-50)] to-white border-[var(--teal-200)]">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex-1">
@@ -434,17 +383,17 @@ export function FocusPage() {
         {/* Main Focus Area */}
         <div className="space-y-6">
           {/* Focus Timer with Lock Visual Feedback */}
-          <Card className={`bg-gradient-to-br from-teal-50 to-white border-teal-200 shadow-lg overflow-hidden transition-all duration-300 ${isLocked ? 'ring-4 ring-teal-400' : ''}`}>
+          <Card className={`bg-gradient-to-br from-[var(--teal-50)] to-white border-[var(--teal-200)] shadow-lg overflow-hidden transition-all duration-300 ${isLocked ? 'ring-4 ring-[var(--teal-400)]' : ''}`}>
             <CardContent className="p-8 relative">
               {isLocked && (
-                <div className="absolute inset-0 bg-[rgba(20,184,166,0.05)] backdrop-blur-sm pointer-events-none z-10" />
+                <div className="absolute inset-0 bg-[var(--teal-400)]/5 backdrop-blur-[1px] pointer-events-none z-10" />
               )}
               
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   <span className="text-sm text-muted-foreground">
-                    {isLocked ? '🔒 Focus Mode Active - Locked' : isRunning ? 'Focus Active' : (isSetupMode ? 'Set Timer' : 'Ready to Focus')}
+                    {isLocked ? '🔒 Focus Mode Active - Locked' : isRunning ? 'Focus Active' : (isSetupMode ? 'ตั้งเวลาใหม่' : 'Ready to Focus')}
                   </span>
                 </div>
                 <TooltipProvider>
@@ -470,9 +419,9 @@ export function FocusPage() {
               {/* Timer Setup Mode */}
               {isSetupMode ? (
                 <div className="text-center">
-                  <h3 className="text-xl font-semibold mb-6">Setup Focus Timer</h3>
+                  <h3 className="text-xl font-semibold mb-6">Setup Focus Session</h3>
 
-                  <div className="mb-8 bg-gray-50 rounded-lg p-4">
+                  <div className="mb-8">
                     <label className="block text-sm font-medium text-foreground mb-3">
                       Focus Duration (minutes)
                     </label>
@@ -483,8 +432,8 @@ export function FocusPage() {
                           onClick={() => setSelectedDuration(minutes)}
                           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                             selectedDuration === minutes
-                              ? 'bg-teal-400 text-foreground'
-                              : 'bg-gray-50 text-foreground hover:bg-gray-100'
+                              ? 'bg-[var(--teal-400)] text-white'
+                              : 'bg-[var(--teal-100)] text-foreground hover:bg-[var(--teal-200)]'
                           }`}
                         >
                           {minutes}
@@ -509,9 +458,9 @@ export function FocusPage() {
                       setTime(selectedDuration * 60);
                       setIsSetupMode(false);
                     }}
-                    className="w-full max-w-xs rounded-2xl bg-teal-400 hover:bg-teal-500 py-6"
+                    className="w-full max-w-xs rounded-2xl bg-[var(--teal-400)] hover:bg-[var(--teal-500)] py-6"
                   >
-                    Start Focus Timer
+                    Start Focus Session
                   </Button>
                 </div>
               ) : (
@@ -547,9 +496,27 @@ export function FocusPage() {
                             <p className="text-sm text-muted-foreground">
                               {time === 0 ? "Focus Time Complete!" :
                                isSetupMode ? "Set your focus time" :
-                               "Focus in progress"}
+                               `${getTodaySessionCount()} video${getTodaySessionCount() === 1 ? '' : 's'} completed today`}
                             </p>
-                                                      </div>
+                            {!isSetupMode && getTodaySessionCount() > 0 && (
+                              <div className="text-xs text-[var(--teal-600)] mt-1">
+                                Sessions completed: {getTodaySessionCount()}
+                              </div>
+                            )}
+                            {time === 0 && !isSetupMode && (
+                              <div className="mt-4">
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  📹 Complete your video lesson to count this session
+                                </p>
+                                <Button
+                                  onClick={handleVideoLessonComplete}
+                                  className="w-full max-w-xs rounded-xl bg-[var(--teal-400)] hover:bg-[var(--teal-500)] text-white py-2 px-4 text-sm"
+                                >
+                                  ✅ I Completed the Video Lesson
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </TooltipTrigger>
@@ -571,7 +538,7 @@ export function FocusPage() {
                           <Button
                             size="lg"
                             onClick={() => !isLocked && handleToggleTimer()}
-                            className="rounded-full w-20 h-20 bg-teal-400 hover:bg-teal-500 disabled:opacity-50"
+                            className="rounded-full w-20 h-20 bg-[var(--teal-400)] hover:bg-[var(--teal-500)] disabled:opacity-50"
                             disabled={isLocked || time === 0}
                           >
                             {isRunning ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
@@ -579,7 +546,7 @@ export function FocusPage() {
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="text-xs">{isRunning ? 'Pause focus' : 'Start focus timer'}</p>
+                        <p className="text-xs">{isRunning ? 'Pause focus' : 'Start focus session'}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -597,7 +564,7 @@ export function FocusPage() {
                               setIsRunning(false);
                               setIsSetupMode(true);
                             }}
-                            className="rounded-full w-20 h-20 border-teal-400 text-teal-400 hover:bg-teal-50"
+                            className="rounded-full w-20 h-20 border-[var(--teal-400)] text-[var(--teal-400)] hover:bg-[var(--teal-50)]"
                             disabled={isLocked}
                           >
                             <RefreshCw className="w-8 h-8" />
@@ -620,7 +587,7 @@ export function FocusPage() {
                               <Button
                                 size="lg"
                                 variant="outline"
-                                className="rounded-full w-20 h-20 border-teal-400 text-teal-400 hover:bg-teal-50"
+                                className="rounded-full w-20 h-20 border-[var(--teal-400)] text-[var(--teal-400)] hover:bg-[var(--teal-50)]"
                                 disabled={isLocked}
                               >
                                 <Users className="w-8 h-8" />
@@ -637,13 +604,13 @@ export function FocusPage() {
                     <DialogContent className="sm:max-w-lg">
                       <DialogHeader>
                         <DialogTitle>Invite Friends to Focus Together</DialogTitle>
-                        <DialogDescription>Select friends to join your focus timer and grow pets together</DialogDescription>
+                        <DialogDescription>Select friends to join your focus session and grow pets together</DialogDescription>
                       </DialogHeader>
                       <div className="space-y-3 mt-4">
                         {friendsInFocus.map((friend, index) => (
                           <div
                             key={index}
-                            className="flex items-center justify-between p-4 bg-teal-50 rounded-2xl hover:bg-teal-100 transition-colors cursor-pointer"
+                            className="flex items-center justify-between p-4 bg-[var(--teal-50)] rounded-2xl hover:bg-[var(--teal-100)] transition-colors cursor-pointer"
                             onClick={() => {
                               const isInvited = invitedFriends.some(f => f.name === friend.name);
                               if (isInvited) {
@@ -654,7 +621,7 @@ export function FocusPage() {
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <Avatar className="w-12 h-12 border-2 border-teal-400">
+                              <Avatar className="w-12 h-12 border-2 border-[var(--teal-400)]">
                                 <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.name}`} />
                                 <AvatarFallback>{friend.name[0]}</AvatarFallback>
                               </Avatar>
@@ -667,7 +634,7 @@ export function FocusPage() {
                               <span className="text-2xl">{friend.pet}</span>
                               <Badge
                                 variant="secondary"
-                                className={invitedFriends.some(f => f.name === friend.name) ? 'bg-teal-400 text-white' : 'bg-teal-100'}
+                                className={invitedFriends.some(f => f.name === friend.name) ? 'bg-[var(--teal-400)] text-white' : 'bg-[var(--teal-100)]'}
                               >
                                 {invitedFriends.some(f => f.name === friend.name) ? 'Invited' : 'Invite'}
                               </Badge>
@@ -676,7 +643,7 @@ export function FocusPage() {
                         ))}
                       </div>
                       <Button
-                        className="w-full mt-4 rounded-2xl bg-teal-400 hover:bg-teal-500"
+                        className="w-full mt-4 rounded-2xl bg-[var(--teal-400)] hover:bg-[var(--teal-500)]"
                         onClick={() => setShowInviteFriends(false)}
                       >
                         Start Group Focus ({invitedFriends.length} friends)
@@ -694,7 +661,7 @@ export function FocusPage() {
                   <div className="flex -space-x-2">
                     {invitedFriends.map((friend, index) => (
                       <div key={index} className="relative group">
-                        <Avatar className="w-10 h-10 border-2 border-white ring-2 ring-teal-400 hover:scale-110 transition-transform">
+                        <Avatar className="w-10 h-10 border-2 border-white ring-2 ring-[var(--teal-400)] hover:scale-110 transition-transform">
                           <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.name}`} />
                           <AvatarFallback>{friend.name[0]}</AvatarFallback>
                         </Avatar>
@@ -709,13 +676,8 @@ export function FocusPage() {
               )}
 
               {isLocked && unlockClicks === 1 && (
-<<<<<<< Updated upstream
                 <div className="mt-6 p-4 bg-[var(--teal-100)] rounded-2xl text-center">
-                  <p className="text-sm text-foreground">🔒 Tap &quot;Unlock&quot; once more to exit focus mode</p>
-=======
-                <div className="mt-6 p-4 bg-teal-100 rounded-2xl text-center">
                   <p className="text-sm text-foreground">🔒 Tap "Unlock" once more to exit focus mode</p>
->>>>>>> Stashed changes
                 </div>
               )}
             </CardContent>
@@ -723,7 +685,7 @@ export function FocusPage() {
 
           {/* Shared Pet Growth Section */}
           {invitedFriends.length > 0 && (
-            <Card className="bg-gradient-to-br from-teal-100 to-teal-50 border-teal-300">
+            <Card className="bg-gradient-to-br from-[var(--teal-100)] to-[var(--teal-50)] border-[var(--teal-300)]">
               <CardContent className="p-6">
                 <h3 className="mb-4">🌱 Group Pet Garden</h3>
                 <div className="flex justify-center gap-3 mb-4">
@@ -747,7 +709,7 @@ export function FocusPage() {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-xs">Group focus earns 2x XP</p>
+                      <p className="text-xs">Group sessions earn 2x XP</p>
                       <p className="text-xs text-muted-foreground">Keep focusing together!</p>
                     </TooltipContent>
                   </Tooltip>
@@ -765,7 +727,7 @@ export function FocusPage() {
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full rounded-2xl border-teal-200 hover:bg-teal-50 py-6"
+                        className="w-full rounded-2xl border-[var(--teal-200)] hover:bg-[var(--teal-50)] py-6"
                       >
                         <Music className="w-5 h-5 mr-2" />
                         <span>Relax Mode - Ambient Playlist</span>
@@ -789,8 +751,8 @@ export function FocusPage() {
                     key={index}
                     className={`cursor-pointer transition-all border ${
                       selectedMusic === index
-                        ? 'border-teal-400 shadow-md bg-teal-50'
-                        : 'border-teal-200 hover:border-teal-300'
+                        ? 'border-[var(--teal-400)] shadow-md bg-[var(--teal-50)]'
+                        : 'border-[var(--teal-200)] hover:border-[var(--teal-300)]'
                     }`}
                     onClick={() => setSelectedMusic(index)}
                   >
@@ -799,13 +761,13 @@ export function FocusPage() {
                         <div
                           className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                             selectedMusic === index
-                              ? 'bg-teal-400'
-                              : 'bg-teal-100'
+                              ? 'bg-[var(--teal-400)]'
+                              : 'bg-[var(--teal-100)]'
                           }`}
                         >
                           <Music
                             className={`w-5 h-5 ${
-                              selectedMusic === index ? 'text-white' : 'text-teal-500'
+                              selectedMusic === index ? 'text-white' : 'text-[var(--teal-500)]'
                             }`}
                           />
                         </div>
@@ -822,9 +784,9 @@ export function FocusPage() {
             </DialogContent>
           </Dialog>
 
-          {/* Professional Audio Player */}
+          {/* Audio Player */}
           <div className="space-y-3">
-            <ProfessionalAudioPlayer
+            <AudioPlayer
               track={focusTracks[selectedMusic]}
               isSelected={true}
               onSelect={() => {}}
@@ -835,18 +797,18 @@ export function FocusPage() {
         {/* Right Sidebar - Simplified */}
         <div className="space-y-6">
           {/* Virtual Pet Display */}
-          <Card className="overflow-hidden border-teal-200">
-            <CardContent className="p-6 bg-gradient-to-br from-teal-300 to-teal-200 text-center">
+          <Card className="overflow-hidden border-[var(--teal-200)]">
+            <CardContent className="p-6 bg-gradient-to-br from-[var(--teal-300)] to-[var(--teal-200)] text-center">
               <h4 className="text-foreground mb-3">Your Focus Buddy</h4>
               <div className={`text-8xl mb-4 ${getPetAnimation()}`}>{selectedPet.emoji}</div>
               <p className="text-foreground mb-2">{selectedPet.name}</p>
-              <Badge variant="secondary" className="bg-[rgba(255,255,255,0.6)] text-foreground border-0 mb-4">
+              <Badge variant="secondary" className="bg-white/60 text-foreground border-0 mb-4">
                 Level {selectedPet.level} • {selectedPet.mood}
               </Badge>
 
               {/* Real Pet Status Bars */}
               {currentPet && (
-                <div className="bg-[rgba(255,255,255,0.6)] backdrop-blur-sm rounded-2xl p-4 space-y-3">
+                <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 space-y-3">
                   <div className="text-sm font-medium text-foreground mb-2">Pet Status</div>
 
                   <div className="space-y-2">
@@ -890,7 +852,7 @@ export function FocusPage() {
                   </div>
 
                   {/* EXP Progress */}
-                  <div className="mt-4 pt-3 border-t border-[rgba(255,255,255,0.3)]">
+                  <div className="mt-4 pt-3 border-t border-white/30">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-xs font-medium">Level Progress</span>
                       <span className="text-xs">{currentPet.exp}/{currentPet.level * 200} XP</span>
@@ -904,24 +866,20 @@ export function FocusPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3">
-            <Card className="bg-gradient-to-br from-teal-400 to-teal-300 border-0">
+            <Card className="bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)] border-0">
               <CardContent className="p-4 text-center">
-                {/* เปลี่ยนป้ายกำกับตามที่ขอ */}
-                <p className="text-[rgba(255,255,255,0.9)] text-xs mb-1">Total Times (Today)</p>
-
-                {/* ส่วนนี้แสดงเวลา 00:00:00 และจะอัปเดตเมื่อมีเวลาสะสม */}
-                <h3 className="text-[rgba(255,255,255,0.9)]">{formatTime(getTodayTotalTime())}</h3>
-
-                <p className="text-[rgba(255,255,255,0.9)] text-xs mt-1">
+                <p className="text-white/90 text-xs mb-1">total time</p>
+                <h3 className="text-white">{formatTime(getTodayTotalTime())}</h3>
+                <p className="text-white/70 text-xs mt-1">
                   Completed Cycles
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-teal-300 to-teal-200 border-0">
+            <Card className="bg-gradient-to-br from-[var(--teal-300)] to-[var(--teal-200)] border-0">
               <CardContent className="p-4 text-center">
-                <p className="text-[rgba(255,255,255,0.8)] text-xs mb-1">Sessions</p>
+                <p className="text-foreground/80 text-xs mb-1">Sessions</p>
                 <h3 className="text-foreground">{getTodaySessionCount()}</h3>
-                <p className="text-[rgba(255,255,255,0.6)] text-xs mt-1">
+                <p className="text-foreground/60 text-xs mt-1">
                   {getTodaySessionCount() === 0 ? 'No videos completed' : 'Videos completed'}
                 </p>
               </CardContent>
@@ -929,47 +887,21 @@ export function FocusPage() {
           </div>
 
           {/* Focus Tips */}
-          <Card className="bg-teal-50 border-teal-200">
+          <Card className="bg-[var(--teal-50)] border-[var(--teal-200)]">
             <CardContent className="p-5">
               <h4 className="mb-3">💡 Focus Tips</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 <li>• Take breaks every 25 minutes</li>
-                <li>• Stay hydrated during focus time</li>
+                <li>• Stay hydrated during sessions</li>
                 <li>• Keep workspace organized</li>
                 <li>• Avoid multitasking</li>
               </ul>
             </CardContent>
           </Card>
+          </div>
+        </div>
         </div>
       </div>
-
-      {/* Focus Floating Button - appears when timer is running */}
-      <FocusFloatingButton
-        isRunning={isRunning}
-        time={time}
-        timeDisplay={timeDisplay}
-        selectedMusic={selectedMusic}
-        focusTracks={focusTracks}
-        isLocked={isLocked}
-        onPausePlay={handleToggleTimer}
-        onUnlock={() => {
-          setIsLocked(false);
-          setUnlockClicks(0);
-        }}
-        onMusicSelect={setSelectedMusic}
-        onLockToggle={() => {
-          if (isLocked) {
-            setUnlockClicks(unlockClicks + 1);
-            if (unlockClicks + 1 >= 2) {
-              setIsLocked(false);
-              setUnlockClicks(0);
-            }
-          } else {
-            setIsLocked(true);
-            setUnlockClicks(0);
-          }
-        }}
-      />
     </div>
   );
 }
