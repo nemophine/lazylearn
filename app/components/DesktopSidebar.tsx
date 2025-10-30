@@ -59,13 +59,13 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
   const NavItem = ({ item }: { item: typeof mainNavItems[0] }) => {
     const Icon = item.icon;
     const isActive = activePage === item.id;
-    
+
     return (
       <button
         onClick={() => onNavigate(item.id)}
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
-          isActive 
-            ? 'bg-[var(--teal-400)] text-white shadow-md' 
+          isActive
+            ? 'bg-[var(--teal-400)] text-white shadow-md'
             : 'text-foreground hover:bg-[var(--teal-50)]'
         }`}
       >
@@ -91,7 +91,7 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
   );
 
   return (
-    <aside 
+    <aside
       className={`fixed left-0 top-0 h-screen bg-white border-r border-border flex flex-col transition-all duration-300 z-40 ${
         isExpanded ? 'w-64' : 'w-20'
       }`}
