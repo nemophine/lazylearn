@@ -346,37 +346,56 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
             <span className="text-left">{formatTime(currentTime)}</span>
             <span className="text-right">{formatTime(duration)}</span>
           </div>
-          <Progress
-            value={duration > 0 ? (currentTime / duration) * 100 : 0}
-            className="h-2"
-          />
-          {/* Interactive Progress Bar - Click to seek */}
+          {/* Interactive Progress Bar - Click and drag to seek */}
           <div
-            className="relative w-full h-2 bg-gray-200 rounded-lg cursor-pointer group hover:bg-gray-300 transition-colors"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const percentage = Math.max(0, Math.min(1, x / rect.width));
-              const audio = audioRef.current;
-              if (audio && duration > 0) {
+            className="relative w-full h-2 bg-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-300 group"
+            onMouseDown={(e) => {
+              if (!duration) return;
+
+              const handleSeek = (e: MouseEvent) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+                const percentage = x / rect.width;
                 const newTime = percentage * duration;
-                audio.currentTime = newTime;
-                setCurrentTime(newTime);
-              }
+
+                if (audioRef.current) {
+                  audioRef.current.currentTime = newTime;
+                  setCurrentTime(newTime);
+                }
+              };
+
+              const handleMouseMove = (e: MouseEvent) => {
+                handleSeek(e);
+              };
+
+              const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+                document.body.style.cursor = '';
+              };
+
+              // Initial seek
+              handleSeek(e);
+
+              // Setup drag
+              document.body.style.cursor = 'grabbing';
+              document.addEventListener('mousemove', handleMouseMove);
+              document.addEventListener('mouseup', handleMouseUp);
+              e.preventDefault();
             }}
             title={`${formatTime(currentTime)} / ${formatTime(duration)}`}
           >
             {/* Progress fill */}
             <div
-              className="absolute left-0 top-0 h-full bg-teal-500 rounded-lg transition-all duration-100"
+              className="absolute left-0 top-0 h-full bg-teal-500 rounded-lg transition-all duration-100 group-hover:bg-teal-600"
               style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
             />
             {/* Invisible thumb for accessibility - completely hidden */}
-            {(duration > 0) && (
+            {duration > 0 && (
               <div
                 className="absolute w-1 h-1 opacity-0 pointer-events-none"
                 style={{
-                  left: `${duration > 0 ? Math.max(0, Math.min(100, (currentTime / duration) * 100)) : 0}%`,
+                  left: `${Math.max(0, Math.min(100, (currentTime / duration) * 100))}%`,
                   top: '50%',
                   transform: 'translate(-50%, -50%)'
                 }}
