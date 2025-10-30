@@ -1,12 +1,5 @@
 'use client';
 
-<<<<<<< HEAD
-import { Bell, Coins, Lock, Search } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Input } from './ui/input';
-import { Progress } from './ui/progress';
-import { useFocusMode } from '../state/focus-mode-context';
-=======
 import { useState } from 'react';
 import { Bell, Coins, Search, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -14,7 +7,6 @@ import { Input } from './ui/input';
 import { Progress } from './ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { getDirectNavigation } from '../utils/searchData';
->>>>>>> schedule-feature
 
 interface DesktopHeaderProps {
   userName: string;
@@ -23,10 +15,6 @@ interface DesktopHeaderProps {
   onNavigate?: (page: string, searchQuery?: string) => void;
 }
 
-<<<<<<< HEAD
-export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProps) {
-  const { isFocusMode } = useFocusMode();
-=======
 export function DesktopHeader({ userName, points, level = 5, onNavigate }: DesktopHeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -59,7 +47,6 @@ export function DesktopHeader({ userName, points, level = 5, onNavigate }: Deskt
   const clearSearch = () => {
     setSearchQuery('');
   };
->>>>>>> schedule-feature
 
   return (
     <div className="h-20 bg-white border-b border-border px-8 flex items-center justify-between">
@@ -124,27 +111,10 @@ export function DesktopHeader({ userName, points, level = 5, onNavigate }: Deskt
         </div>
 
         {/* Notifications */}
-        {isFocusMode ? (
-          <div
-            className="relative p-3 rounded-xl bg-[var(--teal-50)] text-muted-foreground cursor-not-allowed"
-            title="Focus Mode active. Notifications are paused."
-            aria-disabled
-          >
-            <Bell className="w-5 h-5" />
-          </div>
-        ) : (
-          <button className="relative p-3 hover:bg-[var(--teal-50)] rounded-xl transition-colors">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--coral)] rounded-full"></span>
-          </button>
-        )}
-
-        {isFocusMode && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--teal-100)] text-[var(--teal-700)] rounded-full">
-            <Lock className="w-4 h-4" />
-            <span className="text-sm">Focus Mode On</span>
-          </div>
-        )}
+        <button className="relative p-3 hover:bg-[var(--teal-50)] rounded-xl transition-colors">
+          <Bell className="w-5 h-5" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--coral)] rounded-full"></span>
+        </button>
 
         {/* User Profile */}
         <button
