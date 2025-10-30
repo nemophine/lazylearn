@@ -192,7 +192,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
                 <img
                   src={course.thumbnail}
                   alt={course.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-full object-fill transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute top-3 right-3">
                   <Badge className={`${getLevelColor(course.level)} text-xs font-medium px-2 py-1`}>
@@ -283,7 +283,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
               <img
                 src={selectedCourse.thumbnail}
                 alt={selectedCourse.title}
-                className="w-24 h-24 object-cover rounded-xl"
+                className="w-24 h-24 object-fill rounded-xl"
               />
               <div className="flex-1">
                 <h1 className="text-2xl font-bold mb-2">{selectedCourse.title}</h1>
@@ -324,7 +324,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
                   <img
                     src={subject.thumbnail}
                     alt={subject.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-full object-fill transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute top-3 right-3">
                     <Badge className={`${getLevelColor(subject.difficulty)} text-xs font-medium px-2 py-1`}>
@@ -404,7 +404,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
                     <img
                       src={video.thumbnail}
                       alt={video.title}
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-fill rounded-lg"
                     />
                     <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center">
                       <Play className="w-12 h-12 text-white fill-current" />

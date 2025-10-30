@@ -209,7 +209,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                       <ImageWithFallback
                         src={video.image}
                         alt={video.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-fill"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                         <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
