@@ -350,9 +350,9 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
             value={duration > 0 ? (currentTime / duration) * 100 : 0}
             className="h-2"
           />
-          {/* Custom Progress Bar - Simplified with proper thumb */}
+          {/* Interactive Progress Bar - Click to seek */}
           <div
-            className="relative w-full h-2 bg-gray-200 rounded-lg cursor-pointer group"
+            className="relative w-full h-2 bg-gray-200 rounded-lg cursor-pointer group hover:bg-gray-300 transition-colors"
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const x = e.clientX - rect.left;
@@ -364,22 +364,23 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
                 setCurrentTime(newTime);
               }
             }}
+            title={`${formatTime(currentTime)} / ${formatTime(duration)}`}
           >
             {/* Progress fill */}
             <div
               className="absolute left-0 top-0 h-full bg-teal-500 rounded-lg transition-all duration-100"
               style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
             />
-            {/* Always visible thumb when track is loaded - properly centered */}
+            {/* Invisible thumb for accessibility - completely hidden */}
             {(duration > 0) && (
               <div
-                className="absolute w-4 h-4 bg-teal-600 border-2 border-white rounded-full shadow-lg z-20 hover:scale-110 cursor-pointer transition-all"
+                className="absolute w-1 h-1 opacity-0 pointer-events-none"
                 style={{
                   left: `${duration > 0 ? Math.max(0, Math.min(100, (currentTime / duration) * 100)) : 0}%`,
                   top: '50%',
                   transform: 'translate(-50%, -50%)'
                 }}
-                title={`${formatTime(currentTime)} / ${formatTime(duration)}`}
+                aria-hidden="true"
               />
             )}
           </div>
