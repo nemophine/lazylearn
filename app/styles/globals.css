@@ -207,3 +207,31 @@
 html {
   font-size: var(--font-size);
 }
+
+/* Force teal colors to work for ADHD clarity */
+.selected-track {
+  background-color: #E9FDFF !important;
+  border-color: #58BFBE !important;
+}
+
+.selected-track .track-number {
+  background-color: #58BFBE !important;
+  color: white !important;
+}
+
+.selected-track .track-title {
+  color: #134e4a !important;
+}
+
+.selected-track .track-info {
+  color: #0f766e !important;
+}
+
+.selected-track .track-badge {
+  background-color: #58BFBE !important;
+  color: white !important;
+}
+
+.selected-track .track-icon {
+  color: #0f766e !important;
+}
