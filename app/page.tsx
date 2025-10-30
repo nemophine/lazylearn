@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { DesktopSidebar } from './components/DesktopSidebar';
 import { DesktopHeader } from './components/DesktopHeader';
@@ -69,6 +69,16 @@ function renderPage(
 export default function Page() {
   const [currentPage, setCurrentPage] = useState<string>(DEFAULT_PAGE);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem('authToken');
+      setIsAuthenticated(!!token);
+    };
+
+    checkAuthStatus();
+  }, []);
 
   // Check if user has visited before (first-time vs returning user)
   const [isFirstTimeUser, setIsFirstTimeUser] = useState<boolean>(() => {

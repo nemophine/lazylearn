@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
+import { apiService } from '../../services/api';
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;
@@ -20,15 +21,45 @@ export function LoginPage({ onNavigate, onLoginSuccess, isFirstTimeUser }: Login
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual authentication logic
-    console.log('Auth attempt:', { email, password, name, isLogin });
+    setIsLoading(true);
+    setError(null);
 
-    // Simulate successful login
-    onLoginSuccess();
-    onNavigate('profile');
+    try {
+      if (isLogin) {
+        // Login user
+        const response = await apiService.login({ email, password });
+        apiService.storeAuthToken(response.data.token);
+
+        // Mark user as having visited before
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('hasVisitedBefore', 'true');
+        }
+
+        onLoginSuccess();
+        onNavigate('profile');
+      } else {
+        // Register user
+        const response = await apiService.register({ email, password, name });
+        apiService.storeAuthToken(response.data.token);
+
+        // Mark user as having visited before
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('hasVisitedBefore', 'true');
+        }
+
+        onLoginSuccess();
+        onNavigate('profile');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Authentication failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -64,6 +95,13 @@ export function LoginPage({ onNavigate, onLoginSuccess, isFirstTimeUser }: Login
                 <Badge className="bg-gradient-to-r from-[var(--teal-500)] to-[var(--blue-500)] text-white px-4 py-2 rounded-full">
                   ✨ New User Registration
                 </Badge>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
             {/* Back Button */}
@@ -155,9 +193,17 @@ export function LoginPage({ onNavigate, onLoginSuccess, isFirstTimeUser }: Login
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-12 rounded-xl bg-[var(--teal-500)] hover:bg-[var(--teal-600)] text-white font-medium"
+                disabled={isLoading}
+                className="w-full h-12 rounded-xl bg-[var(--teal-500)] hover:bg-[var(--teal-600)] text-white font-medium disabled:opacity-50"
               >
-                {isLogin ? 'Sign In' : 'Create Account'}
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    {isLogin ? 'Signing In...' : 'Creating Account...'}
+                  </div>
+                ) : (
+                  isLogin ? 'Sign In' : 'Create Account'
+                )}
               </Button>
 
               {/* Divider */}
