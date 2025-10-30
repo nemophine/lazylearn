@@ -346,42 +346,20 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
             <span className="text-left">{formatTime(currentTime)}</span>
             <span className="text-right">{formatTime(duration)}</span>
           </div>
-          {/* Interactive Progress Bar - Click and drag to seek */}
+          {/* Interactive Progress Bar - Click to seek */}
           <div
             className="relative w-full h-2 bg-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-300 group"
-            onMouseDown={(e) => {
+            onClick={(e) => {
               if (!duration) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const percentage = x / rect.width;
+              const newTime = percentage * duration;
 
-              const handleSeek = (e: MouseEvent) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
-                const percentage = x / rect.width;
-                const newTime = percentage * duration;
-
-                if (audioRef.current) {
-                  audioRef.current.currentTime = newTime;
-                  setCurrentTime(newTime);
-                }
-              };
-
-              const handleMouseMove = (e: MouseEvent) => {
-                handleSeek(e);
-              };
-
-              const handleMouseUp = () => {
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-                document.body.style.cursor = '';
-              };
-
-              // Initial seek
-              handleSeek(e);
-
-              // Setup drag
-              document.body.style.cursor = 'grabbing';
-              document.addEventListener('mousemove', handleMouseMove);
-              document.addEventListener('mouseup', handleMouseUp);
-              e.preventDefault();
+              if (audioRef.current) {
+                audioRef.current.currentTime = newTime;
+                setCurrentTime(newTime);
+              }
             }}
             title={`${formatTime(currentTime)} / ${formatTime(duration)}`}
           >
@@ -390,18 +368,6 @@ export default function ProfessionalAudioPlayer({ track, isSelected, onSelect }:
               className="absolute left-0 top-0 h-full bg-teal-500 rounded-lg transition-all duration-100 group-hover:bg-teal-600"
               style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
             />
-            {/* Invisible thumb for accessibility - completely hidden */}
-            {duration > 0 && (
-              <div
-                className="absolute w-1 h-1 opacity-0 pointer-events-none"
-                style={{
-                  left: `${Math.max(0, Math.min(100, (currentTime / duration) * 100))}%`,
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)'
-                }}
-                aria-hidden="true"
-              />
-            )}
           </div>
         </div>
 
