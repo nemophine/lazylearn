@@ -1,12 +1,7 @@
 'use client';
 
-<<<<<<< Updated upstream
-import { useState, useEffect, useMemo } from 'react';
-import { Play, Pause, RotateCcw, Lock, Unlock, Users, ChevronDown, Flame, Music } from 'lucide-react';
-=======
 import { useState, useEffect } from 'react';
 import { Play, Pause, Lock, Unlock, Users, RefreshCw, ChevronDown, Flame, Music } from 'lucide-react';
->>>>>>> Stashed changes
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -15,10 +10,6 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Progress } from '../ui/progress';
 import { Badge } from '../ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-<<<<<<< Updated upstream
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { useFocusMode } from '../../state/focus-mode-context';
-=======
 
 // Import Audio Player
 import AudioPlayer from '../AudioPlayer';
@@ -71,26 +62,18 @@ const updateFocusStats = (pet: Pet, timeMinutes: number): Pet => ({
   exp: pet.exp + Math.floor(timeMinutes / 10)
 });
 
->>>>>>> Stashed changes
-
 export function FocusPage() {
-  const focusSource = 'focus-session';
-  const { isFocusMode, reason, enterFocusMode, exitFocusMode } = useFocusMode();
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(25 * 60); // Default 25 minutes in seconds
   const [selectedDuration, setSelectedDuration] = useState(25); // minutes
   const [isSetupMode, setIsSetupMode] = useState(true);
   const [selectedMusic, setSelectedMusic] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
-<<<<<<< Updated upstream
-  const [selectedPet] = useState({ emoji: '🐱', name: 'Whiskers', level: 5, mood: 'Happy' });
+  const [currentPet, setCurrentPet] = useState<Pet | null>(null);
+  const [todaySessions, setTodaySessions] = useState<{completed: boolean, duration: number}[]>([]);
   const [showInviteFriends, setShowInviteFriends] = useState(false);
   const [showRelaxMode, setShowRelaxMode] = useState(false);
   const [unlockClicks, setUnlockClicks] = useState(0);
-=======
-  const [currentPet, setCurrentPet] = useState<Pet | null>(null);
-  const [todaySessions, setTodaySessions] = useState<{completed: boolean, duration: number}[]>([]);
->>>>>>> Stashed changes
 
   // Load pet and stats on mount
   useEffect(() => {
@@ -183,7 +166,6 @@ export function FocusPage() {
       status: 'Ready to Play'
     },
   ];
-<<<<<<< Updated upstream
 
   const friendsInFocus = [
     { name: 'Emma', pet: '🐱', time: '00:45:30', selected: false },
@@ -193,30 +175,11 @@ export function FocusPage() {
 
   const [invitedFriends, setInvitedFriends] = useState<typeof friendsInFocus>([]);
 
-=======
-  const availablePets = [
-    { emoji: '🐱', name: 'Whiskers', level: 5, mood: 'Happy' },
-    { emoji: '🐶', name: 'Buddy', level: 3, mood: 'Playful' },
-    { emoji: '🦊', name: 'Firefox', level: 4, mood: 'Curious' },
-    { emoji: '🐻', name: 'Teddy', level: 2, mood: 'Sleepy' },
-  ];
-
->>>>>>> Stashed changes
   const currentCourse = {
     title: 'Advanced JavaScript Patterns',
     progress: 68,
     timeRemaining: '45 mins'
   };
-  const [showInviteFriends, setShowInviteFriends] = useState(false);
-  const [showRelaxMode, setShowRelaxMode] = useState(false);
-  const [unlockClicks, setUnlockClicks] = useState(0);
-
-  const friendsInFocus = [
-    { name: 'Emma', pet: '🐱', time: '00:45:30', selected: false },
-    { name: 'Alex', pet: '🐶', time: '00:32:15', selected: false },
-    { name: 'Sarah', pet: '🦊', time: '01:12:00', selected: false },
-  ];
-  const [invitedFriends, setInvitedFriends] = useState<typeof friendsInFocus>([]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -235,9 +198,6 @@ export function FocusPage() {
     return () => clearInterval(interval);
   }, [isRunning, isLocked, time]);
 
-  
-  
-  
   // Calculate total time (always returns 0)
   const getTodayTotalTime = () => {
     return 0; // Always return 0 to display 00:00:00
@@ -280,28 +240,12 @@ export function FocusPage() {
     setSelectedDuration(25); // Reset to default 25 minutes
   };
 
-  useEffect(() => {
-    if (isRunning && !isLocked) {
-      enterFocusMode(focusSource);
-    } else if (!isRunning && reason === focusSource) {
-      exitFocusMode();
-    }
-  }, [enterFocusMode, exitFocusMode, focusSource, isLocked, isRunning, reason]);
-
-  useEffect(() => {
-    return () => {
-      if (reason === focusSource) {
-        exitFocusMode();
-      }
-    };
-  }, [exitFocusMode, focusSource, reason]);
-
-  const petMood = useMemo(() => {
+  const petMood = () => {
     if (time > 1800) return 'excited';
     if (time > 600) return 'happy';
     if (time > 0) return 'content';
     return 'sleepy';
-  }, [time]);
+  };
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -314,7 +258,7 @@ export function FocusPage() {
   const timeDisplay = formatTime(time);
 
   const getPetAnimation = () => {
-    switch (petMood) {
+    switch (petMood()) {
       case 'excited': return 'animate-bounce';
       case 'happy': return 'animate-pulse';
       case 'content': return '';
@@ -337,7 +281,6 @@ export function FocusPage() {
 
   const totalFocusMinutes = Math.floor(time / 60) + (7 * 150); // 7 days streak * 150 mins avg
   const streakDays = 7;
-
   const sharedXP = invitedFriends.length > 0 ? 750 : 0;
   const sharedXPMax = 1000;
 
@@ -347,11 +290,9 @@ export function FocusPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="mb-1">Focus Mode 🎯</h2>
-          <p className="text-sm text-muted-foreground">
-            {isFocusMode ? 'Community alerts are muted until you pause.' : 'Stay focused with your virtual pet and relaxing ambience'}
-          </p>
+          <p className="text-sm text-muted-foreground">Stay focused with your virtual pet and relaxing ambience</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {/* Streak Icon with Hover */}
           <TooltipProvider>
@@ -398,7 +339,7 @@ export function FocusPage() {
                 <ChevronDown className="w-4 h-4 text-foreground" />
               </button>
             </DropdownMenuTrigger>
-            
+
             <DropdownMenuContent align="end" className="w-48 bg-white border-teal-200 rounded-2xl shadow-lg">
               <DropdownMenuItem className="rounded-xl cursor-pointer">
                 <span className="mr-2">🍖</span> Feed Pet
@@ -439,7 +380,7 @@ export function FocusPage() {
               {isLocked && (
                 <div className="absolute inset-0 bg-[rgba(20,184,166,0.05)] backdrop-blur-sm pointer-events-none z-10" />
               )}
-              
+
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
@@ -525,7 +466,7 @@ export function FocusPage() {
                             cx="50%"
                             cy="50%"
                             r="45%"
-                            stroke="var(--teal-200)"
+                            stroke="teal-200"
                             strokeWidth="12"
                             fill="none"
                           />
@@ -533,7 +474,7 @@ export function FocusPage() {
                             cx="50%"
                             cy="50%"
                             r="45%"
-                            stroke="var(--teal-400)"
+                            stroke="teal-400"
                             strokeWidth="12"
                             fill="none"
                             strokeDasharray={`${((selectedDuration * 60 - time) / (selectedDuration * 60)) * (2 * Math.PI * 45)} ${2 * Math.PI * 45}`}
@@ -549,7 +490,7 @@ export function FocusPage() {
                                isSetupMode ? "Set your focus time" :
                                "Focus in progress"}
                             </p>
-                                                      </div>
+                          </div>
                         </div>
                       </div>
                     </TooltipTrigger>
@@ -684,7 +625,7 @@ export function FocusPage() {
                     </DialogContent>
                   </Dialog>
 
-                                  </div>
+                </div>
               )}
 
               {/* Friend Avatars Below Timer */}
@@ -709,13 +650,8 @@ export function FocusPage() {
               )}
 
               {isLocked && unlockClicks === 1 && (
-<<<<<<< Updated upstream
-                <div className="mt-6 p-4 bg-[var(--teal-100)] rounded-2xl text-center">
-                  <p className="text-sm text-foreground">🔒 Tap &quot;Unlock&quot; once more to exit focus mode</p>
-=======
                 <div className="mt-6 p-4 bg-teal-100 rounded-2xl text-center">
                   <p className="text-sm text-foreground">🔒 Tap "Unlock" once more to exit focus mode</p>
->>>>>>> Stashed changes
                 </div>
               )}
             </CardContent>
@@ -906,22 +842,18 @@ export function FocusPage() {
           <div className="grid grid-cols-2 gap-3">
             <Card className="bg-gradient-to-br from-teal-400 to-teal-300 border-0">
               <CardContent className="p-4 text-center">
-                {/* เปลี่ยนป้ายกำกับตามที่ขอ */}
-                <p className="text-[rgba(255,255,255,0.9)] text-xs mb-1">Total Times (Today)</p>
-
-                {/* ส่วนนี้แสดงเวลา 00:00:00 และจะอัปเดตเมื่อมีเวลาสะสม */}
-                <h3 className="text-[rgba(255,255,255,0.9)]">{formatTime(getTodayTotalTime())}</h3>
-
-                <p className="text-[rgba(255,255,255,0.9)] text-xs mt-1">
+                <p className="text-white/90 text-xs mb-1">Total Times (Today)</p>
+                <h3 className="text-white">{formatTime(getTodayTotalTime())}</h3>
+                <p className="text-white/70 text-xs mt-1">
                   Completed Cycles
                 </p>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-teal-300 to-teal-200 border-0">
               <CardContent className="p-4 text-center">
-                <p className="text-[rgba(255,255,255,0.8)] text-xs mb-1">Sessions</p>
+                <p className="text-foreground/80 text-xs mb-1">Sessions</p>
                 <h3 className="text-foreground">{getTodaySessionCount()}</h3>
-                <p className="text-[rgba(255,255,255,0.6)] text-xs mt-1">
+                <p className="text-foreground/60 text-xs mt-1">
                   {getTodaySessionCount() === 0 ? 'No videos completed' : 'Videos completed'}
                 </p>
               </CardContent>
