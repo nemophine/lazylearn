@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Lock, Unlock, Users, RefreshCw, ChevronDown, Flame, Music } from 'lucide-react';
+import { Play, Pause, Lock, Unlock, Users, RefreshCw, ChevronDown, Flame, Music, Clock, Headphones } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -135,7 +135,7 @@ export function FocusPage() {
     };
 
     return {
-      emoji: petEmojis[currentPet.type] || petEmojis.default,
+      emoji: petEmojis[currentPet.type as keyof typeof petEmojis] || petEmojis.default,
       name: currentPet.name,
       level: currentPet.level,
       mood
@@ -146,49 +146,67 @@ export function FocusPage() {
 
   const focusTracks = [
     {
+      id: 1,
       title: 'Ocean Choir Meditation 🌊',
       duration: '8:23',
       mood: 'Calm & Peaceful',
+      category: 'Nature',
+      bpm: '60',
       file: '/audio/focus/ocean-choir-meditation-8234.mp3',
       source: 'Local File',
       status: 'Ready to Play'
     },
     {
+      id: 2,
       title: 'Relax Meditation Music 🎵',
       duration: '4:24',
       mood: 'Deep Focus',
+      category: 'Meditation',
+      bpm: '72',
       file: '/audio/focus/relax-meditation-music-424572.mp3',
       source: 'Local File',
       status: 'Ready to Play'
     },
     {
+      id: 3,
       title: 'Lo-Fi Ambient with Rain 🌧️',
       duration: '3:45',
       mood: 'Concentration',
+      category: 'Lo-Fi',
+      bpm: '85',
       file: '/audio/focus/lo-fi-ambient-music-with-gentle-rain-sounds-377059.mp3',
       source: 'Local File',
       status: 'Ready to Play'
     },
     {
+      id: 4,
       title: 'Forest Rain Ambient 🌲',
       duration: '3:52',
       mood: 'Relaxing Nature',
+      category: 'Nature',
+      bpm: '68',
       file: '/audio/focus/ambient-forest-rain-375365.mp3',
       source: 'Local File',
       status: 'Ready to Play'
     },
     {
+      id: 5,
       title: 'Perfect Beauty 🎶',
       duration: '4:51',
       mood: 'Peaceful',
+      category: 'Classical',
+      bpm: '76',
       file: '/audio/focus/perfect-beauty-191271.mp3',
       source: 'Local File',
       status: 'Ready to Play'
     },
     {
+      id: 6,
       title: 'Traditional Chinese Music 🎋',
       duration: '2:35',
       mood: 'Cultural Focus',
+      category: 'World',
+      bpm: '80',
       file: '/audio/focus/smooth-as-silk-full-version-traditional-chinese-music-383307.mp3',
       source: 'Local File',
       status: 'Ready to Play'
@@ -1004,46 +1022,79 @@ export function FocusPage() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>🎵 Relax Mode - Ambient Playlist</DialogTitle>
-                <DialogDescription>Choose background music to enhance your focus</DialogDescription>
+                <DialogTitle className="text-gray-900">🎵 Choose Music</DialogTitle>
+                <DialogDescription className="text-gray-600">Select background music for focus</DialogDescription>
               </DialogHeader>
-              <div className="grid grid-cols-2 gap-3 mt-4">
+
+              {/* Track List - Better Single Column */}
+              <div className="mt-4 max-h-80 overflow-y-auto">
                 {focusTracks.map((track, index) => (
-                  <Card
+                  <div
                     key={index}
-                    className={`cursor-pointer transition-all border ${
-                      selectedMusic === index
-                        ? 'border-teal-400 shadow-md bg-teal-50'
-                        : 'border-teal-200 hover:border-teal-300'
-                    }`}
                     onClick={() => setSelectedMusic(index)}
+                    className={`cursor-pointer transition-all border rounded-lg mb-2 ${
+                      selectedMusic === index
+                        ? 'selected-track shadow-md border-teal-400'
+                        : 'border-gray-200 hover:border-teal-300 hover:bg-gray-50'
+                    }`}
                   >
-                    <CardContent className="p-4">
+                    <div className="p-3">
                       <div className="flex items-center gap-3">
+                        {/* Track Number */}
                         <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all flex-shrink-0 ${
                             selectedMusic === index
-                              ? 'bg-teal-400'
-                              : 'bg-teal-100'
+                              ? 'track-number'
+                              : 'bg-gray-100 text-gray-600'
                           }`}
                         >
-                          <Music
-                            className={`w-5 h-5 ${
-                              selectedMusic === index ? 'text-white' : 'text-teal-500'
-                            }`}
-                          />
+                          {index + 1}
                         </div>
+
+                        {/* Track Info */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm mb-0.5 truncate">{track.title}</p>
-                          <p className="text-xs text-muted-foreground">{track.mood}</p>
-                          <p className="text-xs text-muted-foreground">{track.duration}</p>
+                          <p className={`font-medium text-sm ${
+                            selectedMusic === index ? 'track-title' : 'text-gray-900'
+                          }`}>
+                            {track.title}
+                          </p>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className={`text-xs ${
+                              selectedMusic === index ? 'track-info' : 'text-gray-500'
+                            }`}>
+                              {track.duration}
+                            </span>
+                            <span className={`text-xs ${
+                              selectedMusic === index ? 'track-info' : 'text-gray-500'
+                            }`}>
+                              {track.mood}
+                            </span>
+                          </div>
                         </div>
+
+                        {/* Selection Indicator */}
+                        {selectedMusic === index && (
+                          <Music className="w-4 h-4 track-icon flex-shrink-0" />
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-600">
+                  {selectedMusic + 1} of {focusTracks.length} selected
+                </p>
+                <Button
+                  className="rounded-full bg-teal-400 hover:bg-teal-500 px-6 py-2 text-white"
+                  onClick={() => setShowRelaxMode(false)}
+                >
+                  Start Focus
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

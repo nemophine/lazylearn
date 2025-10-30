@@ -9,4 +9,4 @@ export let users: User[] = [
   { id: 2, name: "Bob", gems: 50 },
 ];
 
-export let heartPoints = 850000;
+export let heartPoints = { value: 850000 };

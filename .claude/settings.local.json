@@ -14,7 +14,8 @@
       "Bash(git pull:*)",
       "Bash(git stash:*)",
       "Bash(git push:*)",
-      "Bash(git cherry-pick:*)"
+      "Bash(git cherry-pick:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
