@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## Community Hub API
 
 Purpose-driven backend service for the LazyLearn Community Hub. Implements the decoupled Node.js + Express layer, typed with Kysely, and wired for Redis-powered realtime updates.
@@ -72,6 +73,8 @@ See `src/types/database.ts` for the canonical table definitions consumed by Kyse
 - Add Prisma/Kysely migrations separately (not included here)
 - Tests and CI setup should lint (`npm run lint`) and run integration tests
 =======
+=======
+>>>>>>> feature/edit-profile-enhancements
 # LazyLearn Backend API
 
 Backend API server for LazyLearn application built with Node.js, Express, TypeScript, and PostgreSQL.
@@ -261,5 +264,9 @@ Error responses:
 
 ## License
 
+<<<<<<< HEAD
 MIT
 >>>>>>> schedule-feature
+=======
+MIT
+>>>>>>> feature/edit-profile-enhancements

@@ -1,473 +1,468 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, Play, Clock, Users, Star, BookOpen, Filter, Search } from 'lucide-react';
+import { BookOpen, Clock, Users, Star, Play, Lock, ChevronDown, ChevronUp, CheckCircle, Circle, Code, Smartphone, FlaskConical, Palette, Briefcase } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Progress } from '../ui/progress';
-import {
-  Course,
-  CourseCategory,
-  Subject,
-  VideoLesson,
-  courseCategories,
-  getCoursesByCategory,
-  getCourseById,
-  getSubjectById,
-  getVideoById
-} from '../../utils/courseData';
 
-interface CoursePageProps {
-  onNavigate?: (page: string) => void;
+interface Video {
+  id: number;
+  title: string;
+  duration: string;
+  isCompleted: boolean;
+  isLocked: boolean;
 }
 
-type ViewMode = 'categories' | 'courses' | 'subjects' | 'videos';
+interface Course {
+  id: number;
+  title: string;
+  instructor: string;
+  rating: number;
+  students: number;
+  duration: string;
+  level: string;
+  price: number;
+  image: string;
+  progress: number;
+  isEnrolled: boolean;
+  isLocked: boolean;
+  videos: Video[];
+  category: string;
+}
+
+interface CoursePageProps {
+  onNavigate: (page: string) => void;
+}
 
 export function CoursePage({ onNavigate }: CoursePageProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('categories');
-  const [selectedCategory, setSelectedCategory] = useState<CourseCategory | null>(null);
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLevel, setSelectedLevel] = useState<string>('all');
+  const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
 
-  // Filter courses based on search and level
-  const filteredCourses = selectedCategory
-    ? getCoursesByCategory(selectedCategory.id).filter(course => {
-        const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          course.instructor.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesLevel = selectedLevel === 'all' || course.level === selectedLevel;
-        return matchesSearch && matchesLevel;
-      })
-    : [];
-
-  const handleCategoryClick = (category: CourseCategory) => {
-    setSelectedCategory(category);
-    setSelectedCourse(null);
-    setSelectedSubject(null);
-    setViewMode('courses');
+  const coursesByCategory = {
+    'Web Development': [
+      {
+        id: 1,
+        title: 'Complete Web Development Bootcamp',
+        instructor: 'John Smith',
+        rating: 4.8,
+        students: 15420,
+        duration: '32 hours',
+        level: 'Beginner',
+        price: 89.99,
+        image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=250&fit=crop',
+        progress: 45,
+        isEnrolled: true,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'Introduction to HTML & CSS', duration: '45 min', isCompleted: true, isLocked: false },
+          { id: 2, title: 'Advanced CSS Techniques', duration: '1h 20min', isCompleted: true, isLocked: false },
+          { id: 3, title: 'JavaScript Fundamentals', duration: '2h 15min', isCompleted: true, isLocked: false },
+          { id: 4, title: 'DOM Manipulation', duration: '1h 45min', isCompleted: false, isLocked: false },
+          { id: 5, title: 'React Basics', duration: '2h 30min', isCompleted: false, isLocked: false },
+          { id: 6, title: 'React Hooks & State', duration: '1h 50min', isCompleted: false, isLocked: true },
+        ]
+      },
+      {
+        id: 2,
+        title: 'Advanced JavaScript & TypeScript',
+        instructor: 'Sarah Johnson',
+        rating: 4.9,
+        students: 8750,
+        duration: '28 hours',
+        level: 'Advanced',
+        price: 79.99,
+        image: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?w=400&h=250&fit=crop',
+        progress: 60,
+        isEnrolled: true,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'TypeScript Fundamentals', duration: '2h 15min', isCompleted: true, isLocked: false },
+          { id: 2, title: 'Advanced Type System', duration: '3h 30min', isCompleted: true, isLocked: false },
+          { id: 3, title: 'Design Patterns in JavaScript', duration: '2h 45min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'Async Programming Deep Dive', duration: '2h 20min', isCompleted: false, isLocked: true },
+        ]
+      },
+      {
+        id: 7,
+        title: 'Node.js Backend Development',
+        instructor: 'David Wilson',
+        rating: 4.7,
+        students: 12300,
+        duration: '24 hours',
+        level: 'Intermediate',
+        price: 74.99,
+        image: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400&h=250&fit=crop',
+        progress: 0,
+        isEnrolled: false,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'Node.js Fundamentals', duration: '2h 30min', isCompleted: false, isLocked: false },
+          { id: 2, title: 'Express.js Framework', duration: '3h 15min', isCompleted: false, isLocked: false },
+          { id: 3, title: 'Database Integration', duration: '4h 20min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'RESTful APIs', duration: '3h 45min', isCompleted: false, isLocked: false },
+        ]
+      }
+    ],
+    'Mobile Apps': [
+      {
+        id: 5,
+        title: 'React Native Mobile Development',
+        instructor: 'Alex Thompson',
+        rating: 4.6,
+        students: 9200,
+        duration: '36 hours',
+        level: 'Intermediate',
+        price: 84.99,
+        image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=250&fit=crop',
+        progress: 25,
+        isEnrolled: true,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'React Native Setup & Expo', duration: '1h 45min', isCompleted: true, isLocked: false },
+          { id: 2, title: 'Components & Styling', duration: '2h 30min', isCompleted: true, isLocked: false },
+          { id: 3, title: 'Navigation & Routing', duration: '2h 15min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'State Management with Redux', duration: '3h 20min', isCompleted: false, isLocked: false },
+        ]
+      },
+      {
+        id: 8,
+        title: 'Flutter Complete Course',
+        instructor: 'Maria Garcia',
+        rating: 4.8,
+        students: 7800,
+        duration: '40 hours',
+        level: 'Beginner',
+        price: 94.99,
+        image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=250&fit=crop',
+        progress: 0,
+        isEnrolled: false,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'Dart Programming Basics', duration: '3h 30min', isCompleted: false, isLocked: false },
+          { id: 2, title: 'Flutter Widgets & Layouts', duration: '4h 15min', isCompleted: false, isLocked: false },
+          { id: 3, title: 'State Management Solutions', duration: '3h 45min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'Building Real Apps', duration: '5h 20min', isCompleted: false, isLocked: false },
+        ]
+      }
+    ],
+    'Data Science': [
+      {
+        id: 4,
+        title: 'Python for Data Science & ML',
+        instructor: 'Michael Davis',
+        rating: 4.9,
+        students: 18900,
+        duration: '42 hours',
+        level: 'Intermediate',
+        price: 99.99,
+        image: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400&h=250&fit=crop',
+        progress: 0,
+        isEnrolled: false,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'Python Basics Refresher', duration: '2h 30min', isCompleted: false, isLocked: false },
+          { id: 2, title: 'NumPy & Pandas Deep Dive', duration: '4h 15min', isCompleted: false, isLocked: false },
+          { id: 3, title: 'Data Visualization with Matplotlib', duration: '3h 45min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'Machine Learning Introduction', duration: '5h 30min', isCompleted: false, isLocked: false },
+        ]
+      },
+      {
+        id: 9,
+        title: 'Machine Learning A-Z',
+        instructor: 'Robert Chen',
+        rating: 4.9,
+        students: 25600,
+        duration: '48 hours',
+        level: 'Beginner',
+        price: 119.99,
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop',
+        progress: 0,
+        isEnrolled: false,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'ML Fundamentals', duration: '4h 30min', isCompleted: false, isLocked: false },
+          { id: 2, title: 'Supervised Learning', duration: '6h 15min', isCompleted: false, isLocked: false },
+          { id: 3, title: 'Unsupervised Learning', duration: '5h 45min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'Neural Networks & Deep Learning', duration: '7h 20min', isCompleted: false, isLocked: false },
+        ]
+      }
+    ],
+    'Design': [
+      {
+        id: 3,
+        title: 'UI/UX Design Masterclass',
+        instructor: 'Emily Chen',
+        rating: 4.7,
+        students: 12300,
+        duration: '24 hours',
+        level: 'Intermediate',
+        price: 69.99,
+        image: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=400&h=250&fit=crop',
+        progress: 0,
+        isEnrolled: false,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'Design Principles Fundamentals', duration: '1h 30min', isCompleted: false, isLocked: false },
+          { id: 2, title: 'Color Theory & Typography', duration: '2h 15min', isCompleted: false, isLocked: false },
+          { id: 3, title: 'User Research Methods', duration: '2h 45min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'Prototyping with Figma', duration: '3h 20min', isCompleted: false, isLocked: false },
+        ]
+      },
+      {
+        id: 10,
+        title: 'Graphic Design Bootcamp',
+        instructor: 'Jessica Miller',
+        rating: 4.6,
+        students: 8900,
+        duration: '20 hours',
+        level: 'Beginner',
+        price: 64.99,
+        image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=250&fit=crop',
+        progress: 0,
+        isEnrolled: false,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'Design Principles & Theory', duration: '2h 15min', isCompleted: false, isLocked: false },
+          { id: 2, title: 'Adobe Photoshop Mastery', duration: '4h 30min', isCompleted: false, isLocked: false },
+          { id: 3, title: 'Adobe Illustrator Essentials', duration: '3h 45min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'Building a Portfolio', duration: '2h 20min', isCompleted: false, isLocked: false },
+        ]
+      }
+    ],
+    'Business': [
+      {
+        id: 6,
+        title: 'Digital Marketing Strategy',
+        instructor: 'Lisa Martinez',
+        rating: 4.5,
+        students: 15600,
+        duration: '18 hours',
+        level: 'Beginner',
+        price: 54.99,
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop',
+        progress: 0,
+        isEnrolled: false,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'Marketing Fundamentals', duration: '2h 15min', isCompleted: false, isLocked: false },
+          { id: 2, title: 'Social Media Marketing', duration: '3h 30min', isCompleted: false, isLocked: false },
+          { id: 3, title: 'SEO & Content Strategy', duration: '2h 45min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'Analytics & Performance Tracking', duration: '2h 20min', isCompleted: false, isLocked: false },
+        ]
+      },
+      {
+        id: 11,
+        title: 'Project Management Professional',
+        instructor: 'Thomas Anderson',
+        rating: 4.8,
+        students: 11200,
+        duration: '30 hours',
+        level: 'Intermediate',
+        price: 79.99,
+        image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=250&fit=crop',
+        progress: 0,
+        isEnrolled: false,
+        isLocked: false,
+        videos: [
+          { id: 1, title: 'Project Management Fundamentals', duration: '3h 30min', isCompleted: false, isLocked: false },
+          { id: 2, title: 'Agile & Scrum Methodologies', duration: '4h 15min', isCompleted: false, isLocked: false },
+          { id: 3, title: 'Risk Management & Planning', duration: '3h 45min', isCompleted: false, isLocked: false },
+          { id: 4, title: 'Team Leadership & Communication', duration: '4h 20min', isCompleted: false, isLocked: false },
+        ]
+      }
+    ]
   };
 
-  const handleCourseClick = (course: Course) => {
-    setSelectedCourse(course);
-    setSelectedSubject(null);
-    setViewMode('subjects');
-  };
+  const categories = [
+    { name: 'Web Development', icon: Code, color: 'from-blue-500 to-blue-600', count: coursesByCategory['Web Development'].length },
+    { name: 'Mobile Apps', icon: Smartphone, color: 'from-purple-500 to-purple-600', count: coursesByCategory['Mobile Apps'].length },
+    { name: 'Data Science', icon: FlaskConical, color: 'from-green-500 to-green-600', count: coursesByCategory['Data Science'].length },
+    { name: 'Design', icon: Palette, color: 'from-pink-500 to-pink-600', count: coursesByCategory['Design'].length },
+    { name: 'Business', icon: Briefcase, color: 'from-orange-500 to-orange-600', count: coursesByCategory['Business'].length }
+  ];
 
-  const handleSubjectClick = (subject: Subject) => {
-    setSelectedSubject(subject);
-    setViewMode('videos');
-  };
-
-  const handleVideoClick = (video: VideoLesson) => {
-    // Navigate to video player (KnowledgePage for now)
-    onNavigate?.('knowledge');
-  };
-
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'beginner': return 'bg-green-100 text-green-700';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-700';
-      case 'advanced': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const renderCategories = () => (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Course Categories</h1>
-        <p className="text-muted-foreground">Choose a category to explore courses</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {courseCategories.map((category) => (
-          <Card
-            key={category.id}
-            className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white rounded-2xl overflow-hidden"
-            onClick={() => handleCategoryClick(category)}
-          >
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center text-center">
-                <div className={`${category.color} w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  {category.icon}
-                </div>
-                <h3 className="text-lg font-semibold mb-2 group-hover:text-[var(--teal-600)] transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
-                  {category.description}
-                </p>
-                <div className="w-full flex items-center justify-between pt-3 border-t border-gray-100">
-                  <span className="text-sm font-medium text-gray-600">{category.courseCount} courses</span>
-                  <ChevronRight className="w-5 h-5 text-[var(--teal-600)] group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderCourses = () => (
-    <div className="p-6 max-w-7xl mx-auto">
+  return (
+    <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="ghost"
-            onClick={() => setViewMode('categories')}
-            className="text-[var(--teal-600)]"
-          >
-            ← Back to Categories
-          </Button>
-          {selectedCategory && (
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{selectedCategory.icon}</span>
-              <h1 className="text-3xl font-bold">{selectedCategory.name} Courses</h1>
-            </div>
-          )}
-        </div>
-
-        {/* Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder="Search courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant={selectedLevel === 'all' ? 'default' : 'outline'}
-              onClick={() => setSelectedLevel('all')}
-              size="sm"
-            >
-              All Levels
-            </Button>
-            <Button
-              variant={selectedLevel === 'beginner' ? 'default' : 'outline'}
-              onClick={() => setSelectedLevel('beginner')}
-              size="sm"
-            >
-              Beginner
-            </Button>
-            <Button
-              variant={selectedLevel === 'intermediate' ? 'default' : 'outline'}
-              onClick={() => setSelectedLevel('intermediate')}
-              size="sm"
-            >
-              Intermediate
-            </Button>
-            <Button
-              variant={selectedLevel === 'advanced' ? 'default' : 'outline'}
-              onClick={() => setSelectedLevel('advanced')}
-              size="sm"
-            >
-              Advanced
-            </Button>
-          </div>
-        </div>
+        <h1 className="text-3xl font-bold mb-2">Course Categories</h1>
+        <p className="text-muted-foreground">Choose a category and enroll in courses that match your interests</p>
       </div>
 
-      {/* Courses Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredCourses.map((course) => (
-          <Card
-            key={course.id}
-            className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white rounded-2xl overflow-hidden"
-            onClick={() => handleCourseClick(course)}
-          >
-            <CardContent className="p-0">
-              {/* Course Image */}
-              <div className="relative h-48 overflow-hidden bg-gray-100">
-                <img
-                  src={course.thumbnail}
-                  alt={course.title}
-                  className="w-full h-full object-fill transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute top-3 right-3">
-                  <Badge className={`${getLevelColor(course.level)} text-xs font-medium px-2 py-1`}>
-                    {course.level}
+      {/* Categories with Courses */}
+      <div className="space-y-8">
+        {categories.map((category) => {
+          const CategoryIcon = category.icon;
+          const categoryCourses = coursesByCategory[category.name];
+
+          return (
+            <Card key={category.name} className="overflow-hidden">
+              {/* Category Header */}
+              <div className={`bg-gradient-to-r ${category.color} p-6 text-white`}>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <CategoryIcon className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold mb-1">{category.name}</h2>
+                    <p className="text-white/80">{category.count} courses available</p>
+                  </div>
+                  <Badge className="bg-white/20 text-white border-0 px-4 py-2">
+                    {category.name}
                   </Badge>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
 
-              {/* Course Content */}
-              <div className="p-5">
-                {/* Title */}
-                <h3 className="text-base font-semibold mb-2 line-clamp-2 leading-tight group-hover:text-[var(--teal-600)] transition-colors">
-                  {course.title}
-                </h3>
+              {/* Courses Grid in Category */}
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {categoryCourses.map((course) => (
+                    <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      {/* Course Image */}
+                      <div className="relative">
+                        <img
+                          src={course.image}
+                          alt={course.title}
+                          className="w-full h-40 object-cover"
+                        />
+                        {course.isLocked && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <Lock className="w-6 h-6 text-white" />
+                          </div>
+                        )}
+                        {course.isEnrolled && course.progress > 0 && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                            <div className="bg-white/20 rounded-full h-2">
+                              <div
+                                className="bg-white h-2 rounded-full transition-all"
+                                style={{ width: `${course.progress}%` }}
+                              />
+                            </div>
+                            <p className="text-white text-xs mt-1">{course.progress}% complete</p>
+                          </div>
+                        )}
+                      </div>
 
-                {/* Description */}
-                <p className="text-xs text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
-                  {course.description}
-                </p>
+                      <CardContent className="p-4">
+                        {/* Course Title */}
+                        <h3 className="font-semibold text-base mb-2 line-clamp-2">{course.title}</h3>
 
-                {/* Course Stats */}
-                <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{course.students.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{course.duration}</span>
-                    </div>
-                  </div>
+                        {/* Instructor */}
+                        <p className="text-xs text-muted-foreground mb-3">{course.instructor}</p>
+
+                        {/* Course Stats */}
+                        <div className="flex items-center gap-3 mb-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                            <span>{course.rating}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            <span>{course.students.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{course.duration}</span>
+                          </div>
+                        </div>
+
+                        {/* Level Badge */}
+                        <div className="mb-3">
+                          <Badge variant="secondary" className="border-0 text-xs">
+                            {course.level}
+                          </Badge>
+                        </div>
+
+                        {/* Show Videos Button (for enrolled courses) */}
+                        {course.isEnrolled && (
+                          <Button
+                            variant="outline"
+                            className="w-full rounded-xl h-9 mb-3 text-xs"
+                            onClick={() => setExpandedCourse(expandedCourse === course.id ? null : course.id)}
+                          >
+                            {expandedCourse === course.id ? (
+                              <>
+                                <ChevronUp className="w-3 h-3 mr-1" />
+                                Hide ({course.videos.length})
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-3 h-3 mr-1" />
+                                Videos ({course.videos.length})
+                              </>
+                            )}
+                          </Button>
+                        )}
+
+                        {/* Video List (when expanded) */}
+                        {expandedCourse === course.id && (
+                          <div className="mb-3 max-h-48 overflow-y-auto border rounded-lg p-2 bg-[var(--teal-50)]">
+                            <h4 className="font-medium text-xs mb-2">Course Videos:</h4>
+                            <div className="space-y-1">
+                              {course.videos.map((video, index) => (
+                                <div
+                                  key={video.id}
+                                  className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                                    video.isLocked
+                                      ? 'bg-gray-100 opacity-60 cursor-not-allowed'
+                                      : 'bg-white hover:bg-[var(--teal-100)] cursor-pointer'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    {video.isCompleted ? (
+                                      <CheckCircle className="w-3 h-3 text-green-500" />
+                                    ) : video.isLocked ? (
+                                      <Lock className="w-3 h-3 text-gray-400" />
+                                    ) : (
+                                      <Circle className="w-3 h-3 text-gray-400" />
+                                    )}
+                                    <span className="text-xs text-muted-foreground w-4">
+                                      {index + 1}.
+                                    </span>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className={`text-xs truncate ${video.isLocked ? 'text-gray-500' : 'text-foreground'}`}>
+                                      {video.title}
+                                    </p>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">
+                                    {video.duration}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Action Button */}
+                        {course.isEnrolled ? (
+                          <Button
+                            className="w-full rounded-xl h-9 text-xs"
+                            onClick={() => onNavigate('knowledge')}
+                          >
+                            <Play className="w-3 h-3 mr-1" />
+                            {course.progress > 0 ? 'Continue' : 'Start'}
+                          </Button>
+                        ) : course.isLocked ? (
+                          <Button variant="outline" className="w-full rounded-xl h-9 text-xs" disabled>
+                            <Lock className="w-3 h-3 mr-1" />
+                            Locked
+                          </Button>
+                        ) : (
+                          <Button className="w-full rounded-xl h-9 text-xs">
+                            <BookOpen className="w-3 h-3 mr-1" />
+                            Enroll ${course.price}
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-
-                {/* Rating and Price */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                    <span className="text-sm font-medium">{course.rating}</span>
-                    <span className="text-xs text-muted-foreground">({course.students.toLocaleString()})</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-base font-bold text-[var(--teal-600)]">${course.price}</span>
-                  </div>
-                </div>
-
-                {/* Course Info */}
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{course.subjects.length} subjects</span>
-                  <span>{course.subjects.reduce((acc, s) => acc + s.totalLessons, 0)} lessons</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
-
-      {filteredCourses.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-5xl mb-4">📚</div>
-          <h3 className="text-xl font-semibold mb-2">No courses found</h3>
-          <p className="text-muted-foreground">Try adjusting your search or filters</p>
-        </div>
-      )}
     </div>
   );
-
-  const renderSubjects = () => {
-    if (!selectedCourse) return null;
-
-    return (
-      <div className="p-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="ghost"
-              onClick={() => setViewMode('courses')}
-              className="text-[var(--teal-600)]"
-            >
-              ← Back to Courses
-            </Button>
-          </div>
-
-          <div className="bg-gradient-to-r from-[var(--teal-50)] to-[var(--mint)] rounded-2xl p-6">
-            <div className="flex gap-6">
-              <img
-                src={selectedCourse.thumbnail}
-                alt={selectedCourse.title}
-                className="w-24 h-24 object-fill rounded-xl"
-              />
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold mb-2">{selectedCourse.title}</h1>
-                <p className="text-muted-foreground mb-4">{selectedCourse.description}</p>
-                <div className="flex items-center gap-6 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    <span>{selectedCourse.students.toLocaleString()} students</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                    <span>{selectedCourse.rating} rating</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{selectedCourse.duration}</span>
-                  </div>
-                  <Badge className={getLevelColor(selectedCourse.level)}>
-                    {selectedCourse.level}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Subjects */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {selectedCourse.subjects.map((subject) => (
-            <Card
-              key={subject.id}
-              className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white rounded-2xl overflow-hidden"
-              onClick={() => handleSubjectClick(subject)}
-            >
-              <CardContent className="p-0">
-                {/* Subject Image */}
-                <div className="relative h-36 overflow-hidden bg-gray-100">
-                  <img
-                    src={subject.thumbnail}
-                    alt={subject.title}
-                    className="w-full h-full object-fill transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute top-3 right-3">
-                    <Badge className={`${getLevelColor(subject.difficulty)} text-xs font-medium px-2 py-1`}>
-                      {subject.difficulty}
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Subject Content */}
-                <div className="p-5">
-                  <h3 className="text-base font-semibold mb-2 line-clamp-2 leading-tight group-hover:text-[var(--teal-600)] transition-colors">
-                    {subject.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
-                    {subject.description}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{subject.totalLessons} lessons</span>
-                    <span>{subject.duration}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderVideos = () => {
-    if (!selectedSubject) return null;
-
-    return (
-      <div className="p-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="ghost"
-              onClick={() => setViewMode('subjects')}
-              className="text-[var(--teal-600)]"
-            >
-              ← Back to Subjects
-            </Button>
-          </div>
-
-          <div className="bg-gradient-to-r from-[var(--teal-50)] to-[var(--mint)] rounded-2xl p-6">
-            <h1 className="text-2xl font-bold mb-2">{selectedSubject.title}</h1>
-            <p className="text-muted-foreground mb-4">{selectedSubject.description}</p>
-            <div className="flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-1">
-                <BookOpen className="w-4 h-4" />
-                <span>{selectedSubject.totalLessons} lessons</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                <span>{selectedSubject.duration}</span>
-              </div>
-              <Badge className={getLevelColor(selectedSubject.difficulty)}>
-                {selectedSubject.difficulty}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        {/* Video Lessons */}
-        <div className="space-y-4">
-          {selectedSubject.lessons.map((video, index) => (
-            <Card
-              key={video.id}
-              className="hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => handleVideoClick(video)}
-            >
-              <CardContent className="p-6">
-                <div className="flex gap-6">
-                  <div className="relative w-48 h-28 flex-shrink-0">
-                    <img
-                      src={video.thumbnail}
-                      alt={video.title}
-                      className="w-full h-full object-fill rounded-lg"
-                    />
-                    <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center">
-                      <Play className="w-12 h-12 text-white fill-current" />
-                    </div>
-                    {video.progress !== undefined && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                        <Progress value={video.progress} className="h-1 bg-white/30" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-semibold line-clamp-2">{video.title}</h3>
-                      <span className="text-sm text-muted-foreground">#{index + 1}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{video.description}</p>
-
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{video.duration}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        <span>{video.views.toLocaleString()} views</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs">Instructor:</span>
-                        <span>{video.instructor}</span>
-                      </div>
-                    </div>
-
-                    {video.progress !== undefined && (
-                      <div className="mt-3">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                          <span>Progress</span>
-                          <span>{video.progress}% complete</span>
-                        </div>
-                        <Progress value={video.progress} className="h-2" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // Render based on current view mode
-  switch (viewMode) {
-    case 'categories':
-      return renderCategories();
-    case 'courses':
-      return renderCourses();
-    case 'subjects':
-      return renderSubjects();
-    case 'videos':
-      return renderVideos();
-    default:
-      return renderCategories();
-  }
 }

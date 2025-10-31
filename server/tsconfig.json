@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
 <<<<<<< HEAD
+<<<<<<< HEAD
     "target": "ES2021",
     "module": "ESNext",
     "lib": ["ES2021"],
@@ -19,6 +20,8 @@
   "exclude": ["node_modules", "dist"]
 }
 =======
+=======
+>>>>>>> feature/edit-profile-enhancements
     "target": "ES2020",
     "module": "commonjs",
     "lib": ["ES2020"],
@@ -56,5 +59,9 @@
     "dist",
     "**/*.test.ts"
   ]
+<<<<<<< HEAD
 }
 >>>>>>> schedule-feature
+=======
+}
+>>>>>>> feature/edit-profile-enhancements

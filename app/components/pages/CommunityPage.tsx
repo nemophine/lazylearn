@@ -159,7 +159,7 @@ export function CommunityPage() {
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3 mb-3">
                       <Avatar className="w-10 h-10">
-                        <AvatarImage src={thread.avatar} />
+                        {thread.avatar && <AvatarImage src={thread.avatar} />}
                         <AvatarFallback>{thread.user[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">

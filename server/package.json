@@ -1,5 +1,6 @@
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
   "name": "community-hub-api",
   "version": "0.1.0",
   "private": true,
@@ -44,12 +45,21 @@
     "dev:simple": "node src/app-simple.js",
     "dev:database": "node src/app-database.js",
     "dev:database-ts": "nodemon src/app-database.ts",
+=======
+  "name": "lazylearn-backend",
+  "version": "1.0.0",
+  "description": "Backend API server for LazyLearn application",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "nodemon src/app.ts",
+>>>>>>> feature/edit-profile-enhancements
     "build": "tsc",
     "start": "node dist/app.js",
     "lint": "eslint src/**/*.ts",
     "test": "jest"
   },
   "dependencies": {
+<<<<<<< HEAD
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
@@ -75,6 +85,31 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
+=======
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1",
+    "express-rate-limit": "^7.1.5",
+    "joi": "^17.11.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/pg": "^8.10.9",
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "@types/jest": "^29.5.8",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1"
+>>>>>>> feature/edit-profile-enhancements
   },
   "keywords": [
     "nodejs",
@@ -85,5 +120,9 @@
   ],
   "author": "LazyLearn Team",
   "license": "MIT"
+<<<<<<< HEAD
 >>>>>>> schedule-feature
 }
+=======
+}
+>>>>>>> feature/edit-profile-enhancements
