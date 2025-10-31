@@ -1,22 +1,23 @@
 'use client';
 
-import { 
-  Home, 
-  Focus, 
-  Target, 
-  Gift, 
+import {
+  Home,
+  Focus,
+  Target,
+  Gift,
   User,
-  Search, 
-  Video, 
-  Gamepad2, 
-  GraduationCap, 
-  MessageSquare, 
-  BarChart3, 
+  Search,
+  Video,
+  Gamepad2,
+  GraduationCap,
+  MessageSquare,
+  BarChart3,
   Award,
   BookOpen,
   DollarSign,
   Calendar,
   Smile,
+  Settings,
   ChevronRight
 } from 'lucide-react';
 import { useState } from 'react';
@@ -150,6 +151,7 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
     { id: 'certificate', icon: Award, label: 'Certificates' },
     { id: 'interaction', icon: Calendar, label: 'My Schedule' },
     { id: 'donation', icon: DollarSign, label: 'Support Us' },
+    { id: 'settings', icon: Settings, label: 'Settings' },
   ];
 
   return (
