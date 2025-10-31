@@ -10,6 +10,7 @@ import { Switch } from '../ui/switch';
 import { Progress } from '../ui/progress';
 import { Button } from '../ui/button';
 import Link from 'next/link';
+import PixelPet from '../PixelPet';
 
 interface ProfilePageProps {
   onLogout?: () => void;
@@ -236,6 +237,42 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
               <p className="text-2xl mb-1">⭐</p>
               <p className="text-xs text-muted-foreground">Points</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Virtual Pet Section */}
+      <Card className="mb-6 bg-gradient-to-br from-[var(--teal-50)] to-white border-[var(--teal-200)]">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
+                <Heart className="w-5 h-5 text-[var(--teal-500)]" />
+                Your Learning Companion
+              </h3>
+              <p className="text-sm text-muted-foreground">Your virtual pet grows as you learn!</p>
+            </div>
+            <Link href="/focus">
+              <Button variant="outline" size="sm" className="border-[var(--teal-300)] text-[var(--teal-600)] hover:bg-[var(--teal-50)]">
+                Visit Focus Mode
+              </Button>
+            </Link>
+          </div>
+
+          <div className="flex justify-center">
+            <PixelPet
+              isFocusActive={false}
+              focusTime={0}
+              onStatsUpdate={(stats) => {
+                console.log('Pet stats updated in profile:', stats);
+              }}
+            />
+          </div>
+
+          <div className="text-center mt-4">
+            <p className="text-xs text-muted-foreground">
+              Your companion thrives when you're in focus mode! 🌱
+            </p>
           </div>
         </CardContent>
       </Card>
