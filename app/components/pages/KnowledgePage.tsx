@@ -38,7 +38,7 @@ export function KnowledgePage() {
         <ImageWithFallback
           src="https://images.unsplash.com/photo-1599081595468-de614fc93694"
           alt="Video thumbnail"
-          className="w-full h-full object-cover opacity-80"
+          className="w-full h-full object-fill opacity-80"
         />
         <div className="absolute inset-0 flex items-center justify-center">
           <Button

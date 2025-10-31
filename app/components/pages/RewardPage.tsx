@@ -104,9 +104,9 @@ export function RewardPage() {
               <span className="text-white/90 text-sm">Next Reward Unlock</span>
               <span className="text-white text-sm">{nextRewardPoints - currentPoints} pts</span>
             </div>
-            <Progress 
-              value={(currentPoints / nextRewardPoints) * 100} 
-              className="h-2 bg-white/20"
+            <Progress
+              value={(currentPoints / nextRewardPoints) * 100}
+              className="h-2 bg-white/20 [&>div]:bg-white [&>div]:origin-left"
             />
           </div>
         </CardContent>

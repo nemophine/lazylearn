@@ -1,13 +1,57 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, X, Clock, TrendingUp, BookOpen, Video, Users, Hash } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, X, Clock, TrendingUp, BookOpen, Video, Users, Hash, Star, User, Target, Trophy } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
+import { search, SearchResult, getSearchResultTypeStyling } from '../../utils/searchData';
 
-export function SearchPage() {
-  const [searchQuery, setSearchQuery] = useState('');
+interface SearchPageProps {
+  initialQuery?: string;
+  onNavigate?: (page: string) => void;
+}
+
+export function SearchPage({ initialQuery = '', onNavigate }: SearchPageProps) {
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+
+  useEffect(() => {
+    if (initialQuery) {
+      setSearchQuery(initialQuery);
+    }
+  }, [initialQuery]);
+
+  useEffect(() => {
+    const results = search(searchQuery);
+    setSearchResults(results);
+  }, [searchQuery]);
+
+  // Helper function to get icon for search result type
+  const getResultIcon = (type: SearchResult['type'], icon?: string) => {
+    if (icon) return icon;
+
+    switch (type) {
+      case 'page': return '📄';
+      case 'course': return '📚';
+      case 'lesson': return '📝';
+      case 'mission': return '🎯';
+      case 'user': return '👤';
+      default: return '📄';
+    }
+  };
+
+  // Helper function to handle result click
+  const handleResultClick = (result: SearchResult) => {
+    console.log('Clicked result:', result);
+    if (result.type === 'page' && result.route && onNavigate) {
+      console.log('Navigating to page:', result.route);
+      onNavigate(result.route);
+    } else {
+      // For non-page results, you could navigate to a detail page
+      console.log('Non-page result clicked:', result);
+    }
+  };
 
   const recentSearches = [
     'JavaScript basics',
@@ -151,54 +195,110 @@ export function SearchPage() {
 
           {/* Search Results or Suggestions */}
           <div>
-            <h3 className="mb-4">{searchQuery ? 'Search Results' : 'Suggested for You'}</h3>
-            <div className="grid grid-cols-1 gap-4">
-              {suggestedResults.map((result, index) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex gap-4">
-                      <div className="w-20 h-20 bg-gradient-to-br from-[var(--teal-200)] to-[var(--teal-300)] rounded-2xl flex items-center justify-center flex-shrink-0">
-                        {result.type === 'Course' ? (
-                          <BookOpen className="w-10 h-10 text-[var(--teal-600)]" />
-                        ) : (
-                          <Video className="w-10 h-10 text-[var(--teal-600)]" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="mb-2">{result.title}</p>
-                        <div className="flex items-center gap-3 mb-3">
-                          <Badge variant="secondary" className="border-0">
-                            {result.type}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">{result.category}</span>
+            <h3 className="mb-4">
+              {searchQuery ? `Search Results (${searchResults.length})` : 'Suggested for You'}
+            </h3>
+
+            {searchQuery && searchResults.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {searchResults.map((result) => {
+                  const styling = getSearchResultTypeStyling(result.type);
+                  return (
+                    <Card
+                      key={result.id}
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => handleResultClick(result)}
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex gap-4">
+                          <div className={`w-20 h-20 ${styling.bgColor} border ${styling.borderColor} rounded-2xl flex items-center justify-center flex-shrink-0`}>
+                            <span className="text-3xl">{getResultIcon(result.type, result.icon)}</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium mb-2">{result.title}</p>
+                            <div className="flex items-center gap-3 mb-3">
+                              <Badge
+                                variant="secondary"
+                                className={`${styling.bgColor} ${styling.textColor} border-0`}
+                              >
+                                {styling.label}
+                              </Badge>
+                              {result.category && (
+                                <span className="text-sm text-muted-foreground">{result.category}</span>
+                              )}
+                            </div>
+
+                            {/* Additional details based on type */}
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              {result.duration && <span>⏱️ {result.duration}</span>}
+                              {result.difficulty && <span>📚 {result.difficulty}</span>}
+                              {result.instructor && <span>👨‍🏫 {result.instructor}</span>}
+                              {result.enrolled && <span>👥 {result.enrolled} students</span>}
+                              {result.rating && <span>⭐ {result.rating}</span>}
+                            </div>
+
+                            <p className="text-sm text-muted-foreground mt-2">{result.description}</p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>⭐ {result.rating}</span>
-                          <span>•</span>
-                          <span>{result.students} students</span>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : searchQuery && searchQuery.length >= 2 ? (
+              // No results state
+              <Card className="bg-[var(--teal-50)] border-0">
+                <CardContent className="p-8 text-center">
+                  <div className="text-5xl mb-3">🔍</div>
+                  <h3 className="mb-2">No results found for "{searchQuery}"</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Try searching with different keywords or browse our trending topics
+                  </p>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="px-4 py-2 bg-[var(--teal-500)] text-white rounded-xl hover:bg-[var(--teal-600)] transition-colors"
+                  >
+                    Clear Search
+                  </button>
+                </CardContent>
+              </Card>
+            ) : (
+              // Show suggested results when no search query
+              <div className="grid grid-cols-1 gap-4">
+                {suggestedResults.map((result, index) => (
+                  <Card key={index} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex gap-4">
+                        <div className="w-20 h-20 bg-gradient-to-br from-[var(--teal-200)] to-[var(--teal-300)] rounded-2xl flex items-center justify-center flex-shrink-0">
+                          {result.type === 'Course' ? (
+                            <BookOpen className="w-10 h-10 text-[var(--teal-600)]" />
+                          ) : (
+                            <Video className="w-10 h-10 text-[var(--teal-600)]" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="mb-2">{result.title}</p>
+                          <div className="flex items-center gap-3 mb-3">
+                            <Badge variant="secondary" className="border-0">
+                              {result.type}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">{result.category}</span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>⭐ {result.rating}</span>
+                            <span>•</span>
+                            <span>{result.students} students</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      {/* No Results State */}
-      {searchQuery && searchQuery.length > 2 && (
-        <Card className="mt-6 bg-[var(--teal-50)] border-0">
-          <CardContent className="p-8 text-center">
-            <div className="text-5xl mb-3">🔍</div>
-            <h3 className="mb-2">No results found</h3>
-            <p className="text-sm text-muted-foreground">
-              Try searching with different keywords or browse our trending topics
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

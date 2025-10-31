@@ -1,35 +1,47 @@
 {
-  "name": "community-hub-api",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
+  "name": "lazylearn-backend",
+  "version": "1.0.0",
+  "description": "Backend API server for LazyLearn application",
+  "main": "dist/app.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "nodemon src/app.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "lint": "eslint \"src/**/*.{ts,tsx}\""
+    "start": "node dist/app.js",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
   },
   "dependencies": {
-    "@fastify/redis": "^6.2.0",
+    "express": "^4.18.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
     "helmet": "^7.1.0",
-    "kysely": "^0.27.1",
-    "pg": "^8.13.1",
-    "socket.io": "^4.7.5",
-    "socket.io-redis": "^6.1.0",
-    "zod": "^3.23.8"
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1",
+    "express-rate-limit": "^7.1.5",
+    "joi": "^17.11.0"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "@types/node": "^20.12.12",
-    "eslint": "^9.3.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-security": "^3.0.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.5.4"
-  }
+    "@types/cors": "^2.8.17",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/pg": "^8.10.9",
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "@types/jest": "^29.5.8",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "typescript",
+    "api",
+    "authentication"
+  ],
+  "author": "LazyLearn Team",
+  "license": "MIT"
 }
