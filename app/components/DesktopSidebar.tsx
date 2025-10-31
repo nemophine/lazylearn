@@ -21,6 +21,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { useFocusMode } from '../state/focus-mode-context';
 
@@ -28,6 +30,7 @@ interface SidebarItem {
   id: string;
   icon: typeof Home;
   label: string;
+  href: string;
   disabledInFocusMode?: boolean;
 }
 
@@ -36,7 +39,6 @@ interface NavItemButtonProps {
   isExpanded: boolean;
   isActive: boolean;
   isFocusMode: boolean;
-  onNavigate: (page: string) => void;
 }
 
 function NavItemButton({
@@ -44,31 +46,34 @@ function NavItemButton({
   isExpanded,
   isActive,
   isFocusMode,
-  onNavigate,
 }: NavItemButtonProps) {
   const Icon = item.icon;
   const isDisabled = isFocusMode && item.disabledInFocusMode;
 
+  if (isDisabled) {
+    return (
+      <div
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-muted-foreground cursor-not-allowed bg-[var(--teal-50)]`}
+        title="Focus Mode is on. Community is paused."
+      >
+        <Icon className="w-5 h-5 flex-shrink-0 stroke-2" />
+        {isExpanded && <span className="truncate">{item.label}</span>}
+      </div>
+    );
+  }
+
   return (
-    <button
-      onClick={() => {
-        if (isDisabled) return;
-        onNavigate(item.id);
-      }}
+    <Link
+      href={item.href}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
-        isDisabled
-          ? 'text-muted-foreground cursor-not-allowed bg-[var(--teal-50)]'
-          : isActive
+        isActive
           ? 'bg-[var(--teal-400)] text-white shadow-md'
           : 'text-foreground hover:bg-[var(--teal-50)]'
       }`}
-      disabled={isDisabled}
-      aria-disabled={isDisabled}
-      title={isDisabled ? 'Focus Mode is on. Community is paused.' : undefined}
     >
       <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
       {isExpanded && <span className="truncate">{item.label}</span>}
-    </button>
+    </Link>
   );
 }
 
@@ -77,8 +82,7 @@ interface NavSectionProps {
   items: SidebarItem[];
   isExpanded: boolean;
   isFocusMode: boolean;
-  activePage: string;
-  onNavigate: (page: string) => void;
+  activePathname: string;
 }
 
 function NavSection({
@@ -86,8 +90,7 @@ function NavSection({
   items,
   isExpanded,
   isFocusMode,
-  activePage,
-  onNavigate,
+  activePathname,
 }: NavSectionProps) {
   return (
     <div className="mb-6">
@@ -102,9 +105,8 @@ function NavSection({
             key={item.id}
             item={item}
             isExpanded={isExpanded}
-            isActive={activePage === item.id}
+            isActive={activePathname === item.href}
             isFocusMode={isFocusMode}
-            onNavigate={onNavigate}
           />
         ))}
       </div>
@@ -114,26 +116,26 @@ function NavSection({
 
 interface DesktopSidebarProps {
   activePage: string;
-  onNavigate: (page: string) => void;
 }
 
-export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) {
+export function DesktopSidebar({ activePage }: DesktopSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const { isFocusMode } = useFocusMode();
+  const pathname = usePathname();
 
   const mainNavItems: SidebarItem[] = [
-    { id: 'home', icon: Home, label: 'Home' },
-    { id: 'focus', icon: Focus, label: 'Focus Mode' },
-    { id: 'mission', icon: Target, label: 'Missions' },
-    { id: 'reward', icon: Gift, label: 'Rewards' },
-    { id: 'profile', icon: User, label: 'Profile' },
+    { id: 'home', icon: Home, label: 'Home', href: '/' },
+    { id: 'focus', icon: Focus, label: 'Focus Mode', href: '/focus' },
+    { id: 'mission', icon: Target, label: 'Missions', href: '/missions' },
+    { id: 'reward', icon: Gift, label: 'Rewards', href: '/rewards' },
+    { id: 'profile', icon: User, label: 'Profile', href: '/profile' },
   ];
 
   const learningItems: SidebarItem[] = [
-    { id: 'courses', icon: Video, label: 'Courses' },
-    { id: 'game', icon: Gamepad2, label: 'Games & Quiz' },
-    { id: 'search', icon: Search, label: 'Search' },
-    { id: 'teacher', icon: GraduationCap, label: 'Line Teacher' },
+    { id: 'courses', icon: Video, label: 'Courses', href: '/courses' },
+    { id: 'game', icon: Gamepad2, label: 'Games & Quiz', href: '/game' },
+    { id: 'search', icon: Search, label: 'Search', href: '/search' },
+    { id: 'teacher', icon: GraduationCap, label: 'Line Teacher', href: '/teacher' },
   ];
 
   const communityItems: SidebarItem[] = [
@@ -141,17 +143,18 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
       id: 'community',
       icon: MessageSquare,
       label: 'Community',
+      href: '/community',
       disabledInFocusMode: true,
     },
-    { id: 'cartoon', icon: Smile, label: 'Cartoon Corner' },
+    { id: 'cartoon', icon: Smile, label: 'Cartoon Corner', href: '/cartoon' },
   ];
 
   const otherItems: SidebarItem[] = [
-    { id: 'analysis', icon: BarChart3, label: 'Analysis' },
-    { id: 'certificate', icon: Award, label: 'Certificates' },
-    { id: 'interaction', icon: Calendar, label: 'My Schedule' },
-    { id: 'donation', icon: DollarSign, label: 'Support Us' },
-    { id: 'settings', icon: Settings, label: 'Settings' },
+    { id: 'analysis', icon: BarChart3, label: 'Analysis', href: '/analysis' },
+    { id: 'certificate', icon: Award, label: 'Certificates', href: '/certificates' },
+    { id: 'interaction', icon: Calendar, label: 'My Schedule', href: '/schedule' },
+    { id: 'donation', icon: DollarSign, label: 'Support Us', href: '/donation' },
+    { id: 'settings', icon: Settings, label: 'Settings', href: '/settings' },
   ];
 
   return (
@@ -194,32 +197,28 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
           items={mainNavItems}
           isExpanded={isExpanded}
           isFocusMode={isFocusMode}
-          activePage={activePage}
-          onNavigate={onNavigate}
+          activePathname={pathname}
         />
         <NavSection
           title="Learning"
           items={learningItems}
           isExpanded={isExpanded}
           isFocusMode={isFocusMode}
-          activePage={activePage}
-          onNavigate={onNavigate}
+          activePathname={pathname}
         />
         <NavSection
           title="Community"
           items={communityItems}
           isExpanded={isExpanded}
           isFocusMode={isFocusMode}
-          activePage={activePage}
-          onNavigate={onNavigate}
+          activePathname={pathname}
         />
         <NavSection
           title="More"
           items={otherItems}
           isExpanded={isExpanded}
           isFocusMode={isFocusMode}
-          activePage={activePage}
-          onNavigate={onNavigate}
+          activePathname={pathname}
         />
       </div>
     </aside>

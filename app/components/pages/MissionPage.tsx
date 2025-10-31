@@ -1,204 +1,319 @@
 'use client';
 
-import { CheckCircle2, Circle, Calendar, Trophy, Flame } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCircle2, Circle, Trophy, Star, Zap, Target, Award, Lock, Crown, Sparkles, Gift, Coins, Medal } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Button } from '../ui/button';
+
+interface Mission {
+  id: number;
+  title: string;
+  description: string;
+  reward: {
+    type: 'points' | 'badge' | 'avatar' | 'title' | 'certificate';
+    value: string | number;
+    icon: string;
+    name: string;
+  };
+  completed: boolean;
+  progress: number;
+  total: number;
+  difficulty: 'Common' | 'Rare' | 'Epic' | 'Legendary';
+  category: 'Daily' | 'Weekly' | 'Special' | 'Achievement';
+  locked?: boolean;
+  collected?: boolean;
+}
+
+interface UserLevel {
+  level: number;
+  name: string;
+  xp: number;
+  xpRequired: number;
+  title: string;
+  icon: string;
+  color: string;
+  unlockedRewards: string[];
+}
 
 export function MissionPage() {
-  const dailyMissions = [
-    { id: 1, title: 'Watch 3 video lessons', points: 50, completed: true, progress: 3, total: 3 },
-    { id: 2, title: 'Complete a quiz', points: 30, completed: true, progress: 1, total: 1 },
-    { id: 3, title: 'Focus for 30 minutes', points: 40, completed: false, progress: 18, total: 30 },
-    { id: 4, title: 'Read 2 articles', points: 25, completed: false, progress: 0, total: 2 },
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showCollected, setShowCollected] = useState(false);
+
+  // User current level and stats
+  const [userLevel, setUserLevel] = useState<UserLevel>({
+    level: 12,
+    name: 'Learning Apprentice',
+    xp: 2850,
+    xpRequired: 3000,
+    title: 'Knowledge Seeker',
+    icon: '🎓',
+    color: 'from-blue-500 to-purple-600',
+    unlockedRewards: ['🌟 Beginner Badge', '🏆 First Course', '⚡ Focus Master', '📚 Bookworm', '🎯 Sharpshooter', '🔥 Week Warrior']
+  });
+
+  // Mission rewards with collectible items
+  const missions: Mission[] = [
+    // Daily Missions
+    {
+      id: 1,
+      title: 'Daily Learner',
+      description: 'Complete one lesson today',
+      reward: { type: 'points', value: 50, icon: '💰', name: '50 XP Points' },
+      completed: true,
+      progress: 1,
+      total: 1,
+      difficulty: 'Common',
+      category: 'Daily',
+      collected: true
+    },
+    {
+      id: 2,
+      title: 'Note Taker',
+      description: 'Create 2 video notes',
+      reward: { type: 'badge', value: '📝', icon: '📝', name: 'Note Master Badge' },
+      completed: true,
+      progress: 2,
+      total: 2,
+      difficulty: 'Common',
+      category: 'Daily',
+      collected: true
+    },
+    {
+      id: 3,
+      title: 'Focus Session',
+      description: 'Complete 25-minute focus session',
+      reward: { type: 'points', value: 75, icon: '⚡', name: '75 XP Points' },
+      completed: false,
+      progress: 15,
+      total: 25,
+      difficulty: 'Common',
+      category: 'Daily'
+    },
+    {
+      id: 4,
+      title: 'Community Helper',
+      description: 'Help one community member',
+      reward: { type: 'points', value: 30, icon: '🤝', name: '30 XP Points' },
+      completed: false,
+      progress: 0,
+      total: 1,
+      difficulty: 'Common',
+      category: 'Daily'
+    },
+
+    // Weekly Missions
+    {
+      id: 5,
+      title: 'Course Champion',
+      description: 'Complete 3 full courses',
+      reward: { type: 'avatar', value: '🎓', icon: '🎓', name: 'Scholar Avatar' },
+      completed: true,
+      progress: 3,
+      total: 3,
+      difficulty: 'Rare',
+      category: 'Weekly',
+      collected: true
+    },
+    {
+      id: 6,
+      title: 'Week Warrior',
+      description: 'Study 7 days in a row',
+      reward: { type: 'badge', value: '🔥', icon: '🔥', name: 'Week Warrior Badge' },
+      completed: true,
+      progress: 7,
+      total: 7,
+      difficulty: 'Rare',
+      category: 'Weekly',
+      collected: true
+    },
+    {
+      id: 7,
+      title: 'Quiz Master',
+      description: 'Score 90%+ on 5 quizzes',
+      reward: { type: 'title', value: 'Quiz Master', icon: '🧠', name: 'Quiz Master Title' },
+      completed: false,
+      progress: 3,
+      total: 5,
+      difficulty: 'Rare',
+      category: 'Weekly'
+    },
+    {
+      id: 8,
+      title: 'Focus Expert',
+      description: 'Complete 10 focus sessions',
+      reward: { type: 'points', value: 300, icon: '🎯', name: '300 XP Points' },
+      completed: false,
+      progress: 6,
+      total: 10,
+      difficulty: 'Rare',
+      category: 'Weekly'
+    },
+
+    // Special Missions
+    {
+      id: 9,
+      title: 'Speed Learner',
+      description: 'Complete a course in under 2 hours',
+      reward: { type: 'badge', value: '⚡', icon: '⚡', name: 'Lightning Learner Badge' },
+      completed: true,
+      progress: 1,
+      total: 1,
+      difficulty: 'Epic',
+      category: 'Special',
+      collected: true
+    },
+    {
+      id: 10,
+      title: 'Perfect Score',
+      description: 'Get 100% on any quiz',
+      reward: { type: 'certificate', value: 'Perfect Score', icon: '🏅', name: 'Perfect Score Certificate' },
+      completed: false,
+      progress: 0,
+      total: 1,
+      difficulty: 'Epic',
+      category: 'Special'
+    },
+    {
+      id: 11,
+      title: 'Knowledge Explorer',
+      description: 'Try courses from 4 different categories',
+      reward: { type: 'avatar', value: '🗺️', icon: '🗺️', name: 'Explorer Avatar' },
+      completed: false,
+      progress: 2,
+      total: 4,
+      difficulty: 'Epic',
+      category: 'Special'
+    },
+
+    // Achievement Missions (Legendary)
+    {
+      id: 12,
+      title: 'Learning Legend',
+      description: 'Complete 20 courses total',
+      reward: { type: 'title', value: 'Legend', icon: '👑', name: 'Learning Legend Title' },
+      completed: false,
+      progress: 12,
+      total: 20,
+      difficulty: 'Legendary',
+      category: 'Achievement',
+      locked: true
+    },
+    {
+      id: 13,
+      title: 'Master Teacher',
+      description: 'Help 25 community members',
+      reward: { type: 'avatar', value: '👨‍🏫', icon: '👨‍🏫', name: 'Master Teacher Avatar' },
+      completed: false,
+      progress: 8,
+      total: 25,
+      difficulty: 'Legendary',
+      category: 'Achievement',
+      locked: true
+    },
+    {
+      id: 14,
+      title: 'Focus Master',
+      description: 'Complete 50 focus sessions total',
+      reward: { type: 'badge', value: '🧘', icon: '🧘', name: 'Zen Master Badge' },
+      completed: false,
+      progress: 23,
+      total: 50,
+      difficulty: 'Legendary',
+      category: 'Achievement',
+      locked: true
+    },
+    {
+      id: 15,
+      title: 'Course Collector',
+      description: 'Complete courses from all categories',
+      reward: { type: 'certificate', value: 'Polyglot', icon: '🌍', name: 'Polyglot Certificate' },
+      completed: false,
+      progress: 3,
+      total: 5,
+      difficulty: 'Legendary',
+      category: 'Achievement',
+      locked: true
+    }
   ];
 
-  const weeklyMissions = [
-    { id: 1, title: 'Complete 5 courses', points: 200, completed: false, progress: 2, total: 5 },
-    { id: 2, title: 'Earn 500 points', points: 150, completed: false, progress: 320, total: 500 },
-    { id: 3, title: 'Study 7 days in a row', points: 300, completed: false, progress: 4, total: 7 },
-  ];
+  // Filter missions based on selected category and collected status
+  const filteredMissions = missions.filter(mission => {
+    const categoryMatch = selectedCategory === 'all' || mission.category === selectedCategory;
+    const collectedMatch = !showCollected || !mission.collected;
+    return categoryMatch && collectedMatch;
+  });
 
-  const monthlyMissions = [
-    { id: 1, title: 'Master 3 new skills', points: 1000, completed: false, progress: 1, total: 3 },
-    { id: 2, title: 'Help 10 community members', points: 500, completed: false, progress: 3, total: 10 },
-    { id: 3, title: 'Earn 3 certificates', points: 800, completed: false, progress: 0, total: 3 },
-  ];
+  // Calculate statistics
+  const completedMissions = missions.filter(m => m.completed).length;
+  const collectibleRewards = missions.filter(m => m.completed && !m.collected).length;
+  const totalMissions = missions.length;
 
-  const totalDailyPoints = dailyMissions.reduce((sum, m) => sum + (m.completed ? m.points : 0), 0);
-  const maxDailyPoints = dailyMissions.reduce((sum, m) => sum + m.points, 0);
+  const difficultyColors = {
+    Common: 'bg-gray-100 text-gray-700 border-gray-300',
+    Rare: 'bg-blue-100 text-blue-700 border-blue-300',
+    Epic: 'bg-purple-100 text-purple-700 border-purple-300',
+    Legendary: 'bg-orange-100 text-orange-700 border-orange-300'
+  };
+
+  const difficultyGradients = {
+    Common: 'from-gray-400 to-gray-600',
+    Rare: 'from-blue-400 to-blue-600',
+    Epic: 'from-purple-400 to-purple-600',
+    Legendary: 'from-orange-400 to-orange-600'
+  };
+
+  const categoryIcons = {
+    Daily: '📅',
+    Weekly: '📆',
+    Special: '⭐',
+    Achievement: '🏆'
+  };
+
+  const handleCollectReward = (missionId: number) => {
+    // In a real implementation, this would update the backend
+    console.log(`Collecting reward for mission ${missionId}`);
+  };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h2 className="mb-2">Your Missions 🎯</h2>
-        <p className="text-muted-foreground">Complete missions to earn points and rewards</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Streak Card */}
-        <Card className="lg:col-span-2 bg-gradient-to-br from-[var(--peach)] to-[var(--yellow)] border-0 shadow-lg overflow-hidden">
-          <CardContent className="p-8">
-            <div className="flex items-center justify-between">
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Header with User Level */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
+              <Target className="w-7 h-7 text-[var(--teal-500)]" />
+              Mission Board
+            </h1>
+            <p className="text-muted-foreground">Complete missions to collect rewards and level up</p>
+          </div>
+          <div className="text-right">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-2xl">{userLevel.icon}</span>
               <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <Flame className="w-8 h-8 text-orange-500" />
-                  <h2 className="text-foreground">7 Day Streak!</h2>
-                </div>
-                <p className="text-foreground/80 mb-4">Keep learning every day to maintain your streak!</p>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                    <div key={day} className="w-10 h-10 bg-white/50 rounded-xl flex items-center justify-center">
-                      <span className="text-sm">🔥</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-7xl mb-2">🔥</div>
-                <Badge className="bg-white/50 text-foreground border-0">+10 pts/day</Badge>
+                <div className="text-sm text-muted-foreground">Level {userLevel.level}</div>
+                <div className="font-semibold">{userLevel.name}</div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0">
+              {userLevel.title}
+            </Badge>
+          </div>
+        </div>
 
-        {/* Daily Points Summary */}
-        <Card className="bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)] border-0 shadow-lg">
-          <CardContent className="p-8">
-            <div className="flex items-center gap-3 mb-4">
-              <Trophy className="w-8 h-8 text-white" />
-              <h3 className="text-white">Today's Progress</h3>
-            </div>
-            <div className="mb-4">
-              <div className="flex items-end gap-2 mb-2">
-                <span className="text-5xl text-white">{totalDailyPoints}</span>
-                <span className="text-2xl text-white/80 mb-1">/{maxDailyPoints}</span>
-              </div>
-              <p className="text-white/80 text-sm">points earned today</p>
-            </div>
-            <Progress value={(totalDailyPoints / maxDailyPoints) * 100} className="h-3 bg-white/20" />
-          </CardContent>
-        </Card>
+        {/* XP Progress Bar */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-blue-900">Experience Progress</span>
+            <span className="text-sm text-blue-700">{userLevel.xp} / {userLevel.xpRequired} XP</span>
+          </div>
+          <Progress
+            value={(userLevel.xp / userLevel.xpRequired) * 100}
+            className="h-3 bg-blue-200"
+          />
+        </div>
       </div>
-
-      {/* Mission Tabs */}
-      <Tabs defaultValue="daily" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-md mb-8 bg-[var(--teal-50)] rounded-2xl p-1">
-          <TabsTrigger value="daily" className="rounded-xl">Daily</TabsTrigger>
-          <TabsTrigger value="weekly" className="rounded-xl">Weekly</TabsTrigger>
-          <TabsTrigger value="monthly" className="rounded-xl">Monthly</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="daily" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-0">
-          {dailyMissions.map((mission) => (
-            <Card key={mission.id} className={mission.completed ? 'border-[var(--teal-300)] border-2' : ''}>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="pt-1">
-                    {mission.completed ? (
-                      <CheckCircle2 className="w-7 h-7 text-[var(--teal-500)]" />
-                    ) : (
-                      <Circle className="w-7 h-7 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
-                      <p className={mission.completed ? 'line-through text-muted-foreground' : ''}>
-                        {mission.title}
-                      </p>
-                      <Badge 
-                        variant="secondary" 
-                        className="bg-[var(--yellow)] text-foreground border-0 ml-2 shrink-0"
-                      >
-                        +{mission.points}
-                      </Badge>
-                    </div>
-                    {!mission.completed && (
-                      <>
-                        <Progress 
-                          value={(mission.progress / mission.total) * 100} 
-                          className="h-2 mb-2" 
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          {mission.progress}/{mission.total} completed
-                        </p>
-                      </>
-                    )}
-                    {mission.completed && (
-                      <p className="text-sm text-[var(--teal-500)]">✓ Completed</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="weekly" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-0">
-          {weeklyMissions.map((mission) => (
-            <Card key={mission.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="pt-1">
-                    <Circle className="w-7 h-7 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
-                      <p>{mission.title}</p>
-                      <Badge 
-                        variant="secondary" 
-                        className="bg-[var(--lavender)] text-foreground border-0 ml-2 shrink-0"
-                      >
-                        +{mission.points}
-                      </Badge>
-                    </div>
-                    <Progress 
-                      value={(mission.progress / mission.total) * 100} 
-                      className="h-2 mb-2" 
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      {mission.progress}/{mission.total} completed
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="monthly" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-0">
-          {monthlyMissions.map((mission) => (
-            <Card key={mission.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="pt-1">
-                    <Circle className="w-7 h-7 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
-                      <p>{mission.title}</p>
-                      <Badge 
-                        variant="secondary" 
-                        className="bg-gradient-to-r from-[var(--pink)] to-[var(--coral)] text-foreground border-0 ml-2 shrink-0"
-                      >
-                        +{mission.points}
-                      </Badge>
-                    </div>
-                    <Progress 
-                      value={(mission.progress / mission.total) * 100} 
-                      className="h-2 mb-2" 
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      {mission.progress}/{mission.total} completed
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }
