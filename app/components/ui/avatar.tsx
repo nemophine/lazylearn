@@ -62,7 +62,7 @@ export function AvatarImage({
     }
   }, [context, src]);
 
-  if (!context) {
+  if (!context || !src) {
     return null;
   }
 

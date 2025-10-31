@@ -159,11 +159,11 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
               <div className="flex flex-col items-center">
                 <div className="relative">
                   <Avatar className="w-32 h-32 border-4 border-[var(--teal-200)]">
-                    <AvatarImage src={editImage} />
-                    <AvatarFallback>
-                      {editName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
+                  {editImage && <AvatarImage src={editImage} />}
+                  <AvatarFallback>
+                    {editName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
                   <label className="absolute bottom-0 right-0 bg-[var(--teal-500)] text-white rounded-full p-3 cursor-pointer hover:bg-[var(--teal-600)] transition-colors shadow-lg">
                     <Camera className="w-5 h-5" />
                     <input
@@ -252,7 +252,7 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
               <h3 className="text-lg font-semibold mb-4">Preview</h3>
               <div className="text-center">
                 <Avatar className="w-20 h-20 border-4 border-[var(--teal-200)] mx-auto mb-4">
-                  <AvatarImage src={editImage} />
+                  {editImage && <AvatarImage src={editImage} />}
                   <AvatarFallback>
                     {editName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
                   </AvatarFallback>

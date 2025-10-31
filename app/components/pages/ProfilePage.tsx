@@ -58,7 +58,7 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <Avatar className="w-20 h-20 border-4 border-white">
-              <AvatarImage src={user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"} />
+              {(user?.image && user.image !== "") && <AvatarImage src={user.image} />}
               <AvatarFallback>
                 {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
               </AvatarFallback>

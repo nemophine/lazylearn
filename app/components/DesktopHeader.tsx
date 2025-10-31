@@ -83,7 +83,7 @@ export function DesktopHeader({ userName, points, level = 5, userImage }: Deskto
         >
           <div className="relative">
             <Avatar className="w-10 h-10 border-2 border-[var(--teal-400)]">
-              <AvatarImage src={userImage || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"} />
+              {(userImage && userImage !== "") && <AvatarImage src={userImage} />}
               <AvatarFallback>{userName[0]}</AvatarFallback>
             </Avatar>
             {/* Settings Icon Overlay - appears on hover */}
