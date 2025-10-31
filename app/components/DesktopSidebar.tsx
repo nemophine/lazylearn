@@ -25,6 +25,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { useFocusMode } from '../state/focus-mode-context';
+import { useSidebar } from '../contexts/SidebarContext';
 
 interface SidebarItem {
   id: string;
@@ -119,7 +120,7 @@ interface DesktopSidebarProps {
 }
 
 export function DesktopSidebar({ activePage }: DesktopSidebarProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const { isExpanded, setIsExpanded } = useSidebar();
   const { isFocusMode } = useFocusMode();
   const pathname = usePathname();
 

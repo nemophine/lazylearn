@@ -1,6 +1,7 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import { Search, BookOpen, Video, Brain, Code, Palette, Music, Languages, ChevronRight, Play, Clock, Users, Flame } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
@@ -18,6 +19,45 @@ interface HomePageProps {
 export function HomePage({ onNavigate }: HomePageProps) {
   const { data: session } = useSession();
   const user = session?.user;
+
+  // State for dynamically updated profile data
+  const [profileData, setProfileData] = useState({ userName: user?.name || '', userImage: user?.image || '' });
+
+  // Load profile data from localStorage and listen for updates
+  useEffect(() => {
+    // Load initial profile data
+    if (typeof window !== 'undefined') {
+      const savedProfile = localStorage.getItem('userProfile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          setProfileData({
+            userName: profile.name || user?.name || '',
+            userImage: profile.image || user?.image || ''
+          });
+        } catch (error) {
+          console.error('Error loading profile from localStorage:', error);
+        }
+      }
+    }
+
+    // Listen for profile updates
+    const handleProfileUpdate = (event: CustomEvent) => {
+      const updatedProfile = event.detail;
+      setProfileData({
+        userName: updatedProfile.name || user?.name || '',
+        userImage: updatedProfile.image || user?.image || ''
+      });
+    };
+
+    // Add event listener
+    window.addEventListener('profileUpdated', handleProfileUpdate as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
+    };
+  }, [user?.name, user?.image]);
 
   const categories = [
     { icon: Brain, label: 'Science', tooltip: 'Explore biology, physics, chemistry and more' },
@@ -51,13 +91,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Avatar className="w-14 h-14 border-2 border-[var(--teal-400)]">
-            {(user?.image && user.image !== "") && <AvatarImage src={user.image} />}
+            {(profileData.userImage && profileData.userImage !== "") && <AvatarImage src={profileData.userImage} />}
             <AvatarFallback>
-              {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+              {profileData.userName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="mb-0">Hi, {user?.name || 'Guest'}! 👋</h2>
+            <h2 className="mb-0">Hi, {profileData.userName || 'Guest'}! 👋</h2>
             <p className="text-sm text-muted-foreground">Ready to learn today?</p>
           </div>
         </div>

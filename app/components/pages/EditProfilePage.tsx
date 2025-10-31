@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Camera,
@@ -17,7 +17,9 @@ import {
   Gift,
   Coins,
   Medal,
-  Heart
+  Heart,
+  Crop,
+  RotateCw
 } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
@@ -40,6 +42,17 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
   const [selectedBadges, setSelectedBadges] = useState<string[]>(['Level 5 Learner']);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
+
+  // Improved image cropping state
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const cropAreaRef = useRef<HTMLDivElement>(null);
 
   // Load saved profile data on component mount
   useEffect(() => {
@@ -90,12 +103,21 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
 
       localStorage.setItem('userProfile', JSON.stringify(profileData));
 
+      // Also save to a global location that other components can access
+      // This simulates updating the user session
+      if (typeof window !== 'undefined') {
+        // Trigger a custom event that other components can listen to
+        window.dispatchEvent(new CustomEvent('profileUpdated', {
+          detail: profileData
+        }));
+      }
+
       console.log('Saving profile:', profileData);
 
       // Show success message
       setSaveMessage('Profile saved successfully!');
 
-      // Navigate back to settings after a short delay
+      // Navigate back to settings after a short delay and refresh
       setTimeout(() => {
         window.location.href = '/settings';
       }, 1500);
@@ -128,53 +150,165 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
       // Create a preview URL for the uploaded image
       const reader = new FileReader();
       reader.onloadend = () => {
-        setEditImage(reader.result as string);
+        setOriginalImage(reader.result as string);
+        setShowCropModal(true);
+        setZoom(1);
+        setPosition({ x: 0, y: 0 });
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // Mouse event handlers for dragging
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Touch event handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({
+      x: touch.clientX - position.x,
+      y: touch.clientY - position.y
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    setPosition({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y
+    });
+  };
+
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.2, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 0.2, 0.5));
+  };
+
+  const handleCropImage = () => {
+    if (!canvasRef.current || !imageRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const img = imageRef.current;
+    const size = 300; // Final image size (larger for better quality)
+
+    canvas.width = size;
+    canvas.height = size;
+
+    // Calculate the scaled dimensions
+    const scaledWidth = img.width * zoom;
+    const scaledHeight = img.height * zoom;
+
+    // Calculate crop area (center of the image)
+    const cropX = (scaledWidth - size) / 2 - position.x;
+    const cropY = (scaledHeight - size) / 2 - position.y;
+
+    // Draw the cropped image
+    ctx.drawImage(
+      img,
+      cropX / zoom,
+      cropY / zoom,
+      size / zoom,
+      size / zoom,
+      0,
+      0,
+      size,
+      size
+    );
+
+    const croppedImageUrl = canvas.toDataURL('image/jpeg', 0.9);
+    setEditImage(croppedImageUrl);
+    setShowCropModal(false);
+    setOriginalImage(null);
+  };
+
+  const handleCancelCrop = () => {
+    setShowCropModal(false);
+    setOriginalImage(null);
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
   return (
-    <div className="p-10 max-w-6xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto px-6 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-10">
-        <div className="flex items-center gap-4">
-          <a href="/settings" className="p-2 hover:bg-[var(--teal-50)] rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </a>
-          <div>
-            <h1 className="text-3xl font-bold">Edit Profile</h1>
-            <p className="text-muted-foreground">Customize your profile information and display preferences</p>
-          </div>
+      <div className="flex items-center gap-4 mb-8">
+        <a href="/settings" className="p-2 hover:bg-[var(--teal-50)] rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5" />
+        </a>
+        <div>
+          <h1 className="text-3xl font-bold">Edit Profile</h1>
+          <p className="text-muted-foreground">Customize your profile information and display preferences</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-12">
-          {/* Profile Picture Section */}
+      <div className="space-y-6">
+          {/* Profile Preview Card */}
           <Card>
-            <CardContent className="p-8">
-              <h2 className="text-xl font-semibold mb-6">Profile Picture</h2>
-              <div className="flex flex-col items-center">
-                <div className="relative">
-                  <Avatar className="w-32 h-32 border-4 border-[var(--teal-200)]">
-                  {editImage && <AvatarImage src={editImage} />}
-                  <AvatarFallback>
-                    {editName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                  <label className="absolute bottom-0 right-0 bg-[var(--teal-500)] text-white rounded-full p-3 cursor-pointer hover:bg-[var(--teal-600)] transition-colors shadow-lg">
-                    <Camera className="w-5 h-5" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4 text-center">Profile Preview</h3>
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="relative">
+                    <Avatar className="w-24 h-24 border-4 border-[var(--teal-200)]">
+                      {editImage && <AvatarImage src={editImage} />}
+                      <AvatarFallback>
+                        {editName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <label className="absolute bottom-0 right-0 bg-[var(--teal-500)] text-white rounded-full p-2 cursor-pointer hover:bg-[var(--teal-600)] transition-colors shadow-lg">
+                      <Camera className="w-4 h-4" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-4">Click the camera icon to change your profile picture</p>
+                <h4 className="font-medium mb-1">{editName || 'Your Name'}</h4>
+                <p className="text-sm text-muted-foreground mb-4">{user?.email || 'your.email@example.com'}</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {selectedBadges.map((badgeId) => {
+                    const badge = availableBadges.find(b => b.id === badgeId);
+                    if (!badge) return null;
+                    const Icon = badge.icon;
+                    return (
+                      <Badge key={badge.id} className={badge.color}>
+                        <Icon className="w-3 h-3 mr-1" />
+                        {badge.name}
+                      </Badge>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground mt-4">Click the camera icon to change your profile picture</p>
                 <p className="text-xs text-muted-foreground">Recommended: Square image, at least 200x200px</p>
               </div>
             </CardContent>
@@ -182,7 +316,7 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
 
           {/* Name Section */}
           <Card>
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-6">Display Name</h2>
               <div>
                 <label className="block text-sm font-medium mb-2">Your Name</label>
@@ -199,7 +333,7 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
 
           {/* Badge Selection Section */}
           <Card>
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold">Select Your Badges</h2>
                 <Badge variant="outline">
@@ -242,43 +376,38 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Sidebar */}
-        <div className="space-y-10">
-          {/* Preview Card */}
-          <Card>
-            <CardContent className="p-8">
-              <h3 className="text-lg font-semibold mb-4">Preview</h3>
-              <div className="text-center">
-                <Avatar className="w-20 h-20 border-4 border-[var(--teal-200)] mx-auto mb-4">
-                  {editImage && <AvatarImage src={editImage} />}
-                  <AvatarFallback>
-                    {editName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <h4 className="font-medium mb-1">{editName || 'Your Name'}</h4>
-                <p className="text-sm text-muted-foreground mb-4">{user?.email || 'your.email@example.com'}</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {selectedBadges.map((badgeId) => {
-                    const badge = availableBadges.find(b => b.id === badgeId);
-                    if (!badge) return null;
-                    const Icon = badge.icon;
-                    return (
-                      <Badge key={badge.id} className={badge.color}>
-                        <Icon className="w-3 h-3 mr-1" />
-                        {badge.name}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Action Buttons */}
+          <div className="space-y-4">
+            <Button
+              onClick={handleSaveProfile}
+              disabled={isSaving}
+              className="w-full bg-[var(--teal-500)] hover:bg-[var(--teal-600)] disabled:opacity-50 disabled:cursor-not-allowed h-14 text-base font-medium"
+              size="lg"
+            >
+              {isSaving ? (
+                <>
+                  <div className="w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5 mr-3" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+            <a href="/settings">
+              <Button variant="outline" className="w-full h-14 text-base font-medium" size="lg">
+                <X className="w-5 h-5 mr-3" />
+                Cancel
+              </Button>
+            </a>
+          </div>
 
           {/* Save Message */}
           {saveMessage && (
-            <div className={`p-4 rounded-lg text-center mb-6 ${
+            <div className={`p-4 rounded-lg text-center ${
               saveMessage.includes('Error')
                 ? 'bg-red-50 text-red-700 border border-red-200'
                 : 'bg-green-50 text-green-700 border border-green-200'
@@ -287,37 +416,9 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="space-y-6">
-            <Button
-              onClick={handleSaveProfile}
-              disabled={isSaving}
-              className="w-full bg-[var(--teal-500)] hover:bg-[var(--teal-600)] disabled:opacity-50 disabled:cursor-not-allowed"
-              size="lg"
-            >
-              {isSaving ? (
-                <>
-                  <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-            <a href="/settings">
-              <Button variant="outline" className="w-full" size="lg">
-                <X className="w-4 h-4 mr-2" />
-                Cancel
-              </Button>
-            </a>
-          </div>
-
           {/* Tips */}
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <h4 className="font-medium mb-3">💡 Profile Tips</h4>
               <ul className="text-sm text-muted-foreground space-y-2">
                 <li>• Choose badges that represent your achievements</li>
@@ -327,8 +428,142 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
               </ul>
             </CardContent>
           </Card>
-        </div>
       </div>
+
+      {/* Improved Image Crop Modal */}
+      {showCropModal && (
+        <div className="fixed inset-0 bg-black z-[9999] flex items-center justify-center">
+          <div className="relative w-full h-full flex flex-col">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between z-10">
+              <h3 className="text-lg font-semibold">Adjust Profile Picture</h3>
+              <button
+                onClick={handleCancelCrop}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Crop Area */}
+            <div className="flex-1 relative bg-gray-900 overflow-hidden">
+              <div
+                ref={cropAreaRef}
+                className="absolute inset-0 flex items-center justify-center"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleMouseUp}
+                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+              >
+                {originalImage ? (
+                  <img
+                    ref={imageRef}
+                    src={originalImage}
+                    alt="Crop preview"
+                    className="block"
+                    style={{
+                      maxWidth: 'none',
+                      maxHeight: 'none',
+                      width: 'auto',
+                      height: 'auto',
+                      transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                      transformOrigin: 'center',
+                      userSelect: 'none',
+                      WebkitUserSelect: 'none',
+                      WebkitDraggable: 'false',
+                      KhtmlUserDrag: 'false',
+                      MozUserDrag: 'false',
+                      OUserDrag: 'none',
+                    }}
+                    draggable={false}
+                    />
+                ) : (
+                  <div className="text-white text-center">
+                    <div className="mb-4">
+                      <div className="w-16 h-16 mx-auto bg-gray-700 rounded-full flex items-center justify-center">
+                        <Camera className="w-8 h-8 text-gray-400" />
+                      </div>
+                    </div>
+                    <p>No image loaded</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Crop Overlay */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-2 border-white rounded-lg shadow-2xl">
+                  <div className="absolute inset-0 bg-transparent"></div>
+                  {/* Corner handles */}
+                  <div className="absolute top-0 left-0 w-4 h-4 border-t-3 border-l-3 border-white -translate-x-1/2 -translate-y-1/2"></div>
+                  <div className="absolute top-0 right-0 w-4 h-4 border-t-3 border-r-3 border-white translate-x-1/2 -translate-y-1/2"></div>
+                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-3 border-l-3 border-white -translate-x-1/2 translate-y-1/2"></div>
+                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-3 border-r-3 border-white translate-x-1/2 translate-y-1/2"></div>
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="absolute top-4 left-4 bg-black bg-opacity-75 text-white p-3 rounded-lg text-sm max-w-xs">
+                <p className="mb-1">🖱️ Drag to move</p>
+                <p>🔍 Use buttons below to zoom</p>
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="bg-white border-t border-gray-200 p-4">
+              <div className="max-w-md mx-auto">
+                {/* Zoom Controls */}
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <button
+                    onClick={handleZoomOut}
+                    className="p-3 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                  >
+                    <span className="text-xl">−</span>
+                  </button>
+                  <div className="text-center min-w-[80px]">
+                    <div className="text-sm font-medium">{Math.round(zoom * 100)}%</div>
+                    <div className="text-xs text-gray-500">Zoom</div>
+                  </div>
+                  <button
+                    onClick={handleZoomIn}
+                    className="p-3 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                  >
+                    <span className="text-xl">+</span>
+                  </button>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleCropImage}
+                    className="flex-1 bg-[var(--teal-500)] hover:bg-[var(--teal-600)] h-12 text-base font-medium"
+                    size="lg"
+                  >
+                    <Crop className="w-4 h-4 mr-2" />
+                    Save Picture
+                  </Button>
+                  <Button
+                    onClick={handleCancelCrop}
+                    variant="outline"
+                    className="flex-1 h-12 text-base font-medium"
+                    size="lg"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden canvas for cropping */}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }

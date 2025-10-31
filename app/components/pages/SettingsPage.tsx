@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   User,
@@ -48,6 +48,45 @@ interface SettingsPageProps {
 export function SettingsPage({ onLogout }: SettingsPageProps) {
   const { data: session } = useSession();
   const user = session?.user;
+
+  // State for dynamically updated profile data
+  const [profileData, setProfileData] = useState({ userName: user?.name || '', userImage: user?.image || '' });
+
+  // Load profile data from localStorage and listen for updates
+  useEffect(() => {
+    // Load initial profile data
+    if (typeof window !== 'undefined') {
+      const savedProfile = localStorage.getItem('userProfile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          setProfileData({
+            userName: profile.name || user?.name || '',
+            userImage: profile.image || user?.image || ''
+          });
+        } catch (error) {
+          console.error('Error loading profile from localStorage:', error);
+        }
+      }
+    }
+
+    // Listen for profile updates
+    const handleProfileUpdate = (event: CustomEvent) => {
+      const updatedProfile = event.detail;
+      setProfileData({
+        userName: updatedProfile.name || user?.name || '',
+        userImage: updatedProfile.image || user?.image || ''
+      });
+    };
+
+    // Add event listener
+    window.addEventListener('profileUpdated', handleProfileUpdate as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
+    };
+  }, [user?.name, user?.image]);
 
   const [settings, setSettings] = useState({
     notifications: true,
@@ -222,24 +261,17 @@ export function SettingsPage({ onLogout }: SettingsPageProps) {
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
             <Avatar className="w-20 h-20 border-4 border-[var(--teal-200)]">
-              {(user?.image && user.image !== "") && <AvatarImage src={user.image} />}
+              {(profileData.userImage && profileData.userImage !== "") && <AvatarImage src={profileData.userImage} />}
               <AvatarFallback>
-                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                {profileData.userName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="text-xl font-semibold mb-1">{user?.name || 'Guest User'}</h2>
+              <h2 className="text-xl font-semibold mb-1">{profileData.userName || 'Guest User'}</h2>
               <p className="text-muted-foreground mb-3">{user?.email || 'Not logged in'}</p>
               <div className="flex items-center gap-3 flex-wrap">
-                {userBadges.map((badge) => {
-                  const Icon = badge.icon;
-                  return (
-                    <Badge key={badge.id} className={badge.color}>
-                      <Icon className="w-3 h-3 mr-1" />
-                      {badge.name}
-                    </Badge>
-                  );
-                })}
+                <Badge className="bg-blue-100 text-blue-700 border-blue-300">Level 5 Learner</Badge>
+                <Badge className="bg-purple-100 text-purple-700 border-purple-300">Premium Member</Badge>
               </div>
             </div>
             <Link href="/edit-profile">
