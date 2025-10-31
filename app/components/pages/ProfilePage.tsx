@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession, signOut } from 'next-auth/react';
 import { Settings, User, Palette, Bell, Lock, HelpCircle, LogOut, ChevronRight, Moon, Globe } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -8,7 +9,25 @@ import { Switch } from '../ui/switch';
 import { Progress } from '../ui/progress';
 import { Button } from '../ui/button';
 
-export function ProfilePage() {
+interface ProfilePageProps {
+  onLogout?: () => void;
+}
+
+export function ProfilePage({ onLogout }: ProfilePageProps) {
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirect: false });
+      if (onLogout) {
+        onLogout();
+      }
+      console.log('User logged out successfully');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   const stats = [
     { label: 'Courses', value: '24' },
     { label: 'Hours', value: '156' },
@@ -48,12 +67,14 @@ export function ProfilePage() {
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <Avatar className="w-20 h-20 border-4 border-white">
-              <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src={user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"} />
+              <AvatarFallback>
+                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="text-white mb-1">John Doe</h2>
-              <p className="text-white/90 text-sm mb-2">john.doe@email.com</p>
+              <h2 className="text-white mb-1">{user?.name || 'Guest User'}</h2>
+              <p className="text-white/90 text-sm mb-2">{user?.email || 'Not logged in'}</p>
               <Badge className="bg-white/20 text-white border-0">Level 5 Learner</Badge>
             </div>
           </div>
@@ -135,6 +156,7 @@ export function ProfilePage() {
       <Button
         variant="outline"
         className="w-full rounded-2xl h-12 text-destructive border-destructive/30 hover:bg-destructive/10"
+        onClick={handleLogout}
       >
         <LogOut className="w-5 h-5 mr-2" />
         Log Out
