@@ -27,8 +27,7 @@ export function PageLayout({ children, showLayout = true }: PageLayoutProps) {
           userName={userData?.name || 'John Doe'}
           points={userData?.points || 2450}
           level={userData?.level || 5}
-          isAuthenticated={isAuthenticated}
-          onNavigate={() => {}}
+          userImage={userData?.image}
         />
         <main className="min-h-[calc(100vh-5rem)]">
           {children}

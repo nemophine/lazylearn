@@ -109,3 +109,9 @@ export function AvatarFallback({
     </div>
   );
 }
+
+export {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+};

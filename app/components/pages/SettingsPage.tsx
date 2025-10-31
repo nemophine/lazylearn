@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   User,
   Bell,
@@ -16,19 +17,38 @@ import {
   Shield,
   FileText,
   MessageSquare,
-  ChevronRight
+  ChevronRight,
+  Camera,
+  X,
+  Check,
+  Star,
+  Trophy,
+  Zap,
+  Target,
+  Award,
+  Crown,
+  Sparkles,
+  Gift,
+  Coins,
+  Medal,
+  Heart
 } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
+import { Input } from '../ui/input';
+import Link from 'next/link';
 
 interface SettingsPageProps {
   onLogout: () => void;
 }
 
 export function SettingsPage({ onLogout }: SettingsPageProps) {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const [settings, setSettings] = useState({
     notifications: true,
     emailAlerts: true,
@@ -39,6 +59,12 @@ export function SettingsPage({ onLogout }: SettingsPageProps) {
     twoFactor: false,
     marketingEmails: false
   });
+
+  // User badges for display
+  const userBadges = [
+    { id: 'Level 5 Learner', icon: Star, color: 'bg-white/20 text-white border-0', name: 'Level 5 Learner' },
+    { id: 'Premium Member', icon: Crown, color: 'bg-white/20 text-white border-0', name: 'Premium Member' },
+  ];
 
   const settingsSections = [
     {
@@ -196,21 +222,32 @@ export function SettingsPage({ onLogout }: SettingsPageProps) {
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
             <Avatar className="w-20 h-20 border-4 border-[var(--teal-200)]">
-              <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src={user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"} />
+              <AvatarFallback>
+                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="text-xl font-semibold mb-1">John Doe</h2>
-              <p className="text-muted-foreground mb-3">john.doe@email.com</p>
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary">Level 5 Learner</Badge>
-                <Badge variant="outline">Premium Member</Badge>
+              <h2 className="text-xl font-semibold mb-1">{user?.name || 'Guest User'}</h2>
+              <p className="text-muted-foreground mb-3">{user?.email || 'Not logged in'}</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                {userBadges.map((badge) => {
+                  const Icon = badge.icon;
+                  return (
+                    <Badge key={badge.id} className={badge.color}>
+                      <Icon className="w-3 h-3 mr-1" />
+                      {badge.name}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
-            <Button variant="outline" className="rounded-xl">
-              <User className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
+            <Link href="/edit-profile">
+              <Button variant="outline" className="rounded-xl">
+                <User className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

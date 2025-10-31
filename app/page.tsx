@@ -39,8 +39,7 @@ export default function Page() {
           userName={userData?.name || 'John Doe'}
           points={userData?.points || 2450}
           level={userData?.level || 5}
-          isAuthenticated={isAuthenticated}
-          onNavigate={handleNavigate}
+          userImage={userData?.image}
         />
         <main className="min-h-[calc(100vh-5rem)]">
           {renderPage(currentPage, handleNavigate)}

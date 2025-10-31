@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { User, Bell, Lock, LogOut, ChevronRight, Heart, Sparkles } from 'lucide-react';
+import { User, Bell, Lock, LogOut, ChevronRight, Heart, Sparkles, Star, Trophy, Zap, Target, Award, Crown, Gift, Coins, Medal } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -16,6 +16,12 @@ interface ProfilePageProps {
 export function ProfilePage({ onLogout }: ProfilePageProps) {
   const { data: session } = useSession();
   const user = session?.user;
+
+  // User badges - in a real app this would come from user data/database
+  const userBadges = [
+    { id: 'Level 5 Learner', icon: Star, color: 'bg-white/20 text-white border-0', name: 'Level 5 Learner' },
+    { id: 'Premium Member', icon: Crown, color: 'bg-white/20 text-white border-0', name: 'Premium Member' },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -60,7 +66,17 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
             <div className="flex-1">
               <h2 className="text-white mb-1">{user?.name || 'Guest User'}</h2>
               <p className="text-white/90 text-sm mb-2">{user?.email || 'Not logged in'}</p>
-              <Badge className="bg-white/20 text-white border-0">Level 5 Learner</Badge>
+              <div className="flex items-center gap-2 flex-wrap">
+                {userBadges.map((badge) => {
+                  const Icon = badge.icon;
+                  return (
+                    <Badge key={badge.id} className={badge.color}>
+                      <Icon className="w-3 h-3 mr-1" />
+                      {badge.name}
+                    </Badge>
+                  );
+                })}
+              </div>
             </div>
           </div>
           

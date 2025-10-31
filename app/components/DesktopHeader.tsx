@@ -12,9 +12,10 @@ interface DesktopHeaderProps {
   userName: string;
   points: number;
   level?: number;
+  userImage?: string;
 }
 
-export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProps) {
+export function DesktopHeader({ userName, points, level = 5, userImage }: DesktopHeaderProps) {
   const { isFocusMode } = useFocusMode();
   const [isHovering, setIsHovering] = useState(false);
 
@@ -82,7 +83,7 @@ export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProp
         >
           <div className="relative">
             <Avatar className="w-10 h-10 border-2 border-[var(--teal-400)]">
-              <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
+              <AvatarImage src={userImage || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"} />
               <AvatarFallback>{userName[0]}</AvatarFallback>
             </Avatar>
             {/* Settings Icon Overlay - appears on hover */}

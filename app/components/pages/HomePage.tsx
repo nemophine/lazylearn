@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import { Search, BookOpen, Video, Brain, Code, Palette, Music, Languages, ChevronRight, Play, Clock, Users, Flame } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
@@ -15,6 +16,9 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const categories = [
     { icon: Brain, label: 'Science', tooltip: 'Explore biology, physics, chemistry and more' },
     { icon: Palette, label: 'Art', tooltip: 'Creative arts, design, and visual expression' },
@@ -47,11 +51,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Avatar className="w-14 h-14 border-2 border-[var(--teal-400)]">
-            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarImage src={user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"} />
+            <AvatarFallback>
+              {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+            </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="mb-0">Hi, Emma! 👋</h2>
+            <h2 className="mb-0">Hi, {user?.name || 'Guest'}! 👋</h2>
             <p className="text-sm text-muted-foreground">Ready to learn today?</p>
           </div>
         </div>
