@@ -295,10 +295,10 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
 
           <div className="grid grid-cols-4 gap-4 mb-4">
             {[
-              { emoji: '🏆', title: 'First Course', desc: 'Complete your first course', unlocked: true },
-              { emoji: '⭐', title: '7-Day Streak', desc: 'Learn for 7 days straight', unlocked: true },
-              { emoji: '🔥', title: 'Quick Learner', desc: 'Finish 5 lessons in one day', unlocked: true },
-              { emoji: '🎯', title: 'Perfect Score', desc: 'Get 100% on a quiz', unlocked: false }
+              { title: 'First Course', desc: 'Complete your first course', unlocked: true },
+              { title: '7-Day Streak', desc: 'Learn for 7 days straight', unlocked: true },
+              { title: 'Quick Learner', desc: 'Finish 5 lessons in one day', unlocked: true },
+              { title: 'Perfect Score', desc: 'Get 100% on a quiz', unlocked: false }
             ].map((achievement, index) => (
               <div
                 key={index}
@@ -308,7 +308,6 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
                     : 'bg-gray-100 opacity-50'
                 } rounded-2xl p-4`}
               >
-                <div className="text-3xl mb-2">{achievement.emoji}</div>
                 <h4 className={`text-sm font-medium mb-1 ${
                   achievement.unlocked ? 'text-gray-800' : 'text-gray-500'
                 }`}>
