@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 import { DesktopSidebar } from './components/DesktopSidebar';
 import { DesktopHeader } from './components/DesktopHeader';
@@ -22,7 +23,7 @@ import { SchedulePage } from './components/pages/SchedulePage';
 import { DonationPage } from './components/pages/DonationPage';
 import { CartoonPage } from './components/pages/CartoonPage';
 import { LoginPage } from './components/pages/LoginPage';
-import { apiService } from './services/api';
+import { SettingsPage } from './components/pages/SettingsPage';
 
 const DEFAULT_PAGE = 'home';
 
@@ -32,6 +33,8 @@ function renderPage(
   isAuthenticated: boolean,
   onLoginSuccess: () => void,
   onLogout: () => void,
+  onGoogleSignIn: () => void,
+  onLineSignIn: () => void,
   isFirstTimeUser: boolean,
   searchQuery?: string,
 ): React.ReactElement {
@@ -44,8 +47,12 @@ function renderPage(
       return <MissionPage />;
     case 'reward':
       return <RewardPage />;
+    case 'login':
+      return <LoginPage onNavigate={onNavigate} onLoginSuccess={onLoginSuccess} onGoogleSignIn={onGoogleSignIn} onLineSignIn={onLineSignIn} isFirstTimeUser={false} />;
+    case 'register':
+      return <LoginPage onNavigate={onNavigate} onLoginSuccess={onLoginSuccess} onGoogleSignIn={onGoogleSignIn} onLineSignIn={onLineSignIn} isFirstTimeUser={true} />;
     case 'profile':
-      return isAuthenticated ? <ProfilePage onLogout={onLogout} /> : <LoginPage onNavigate={onNavigate} onLoginSuccess={onLoginSuccess} isFirstTimeUser={isFirstTimeUser} />;
+      return isAuthenticated ? <ProfilePage onLogout={onLogout} /> : <LoginPage onNavigate={onNavigate} onLoginSuccess={onLoginSuccess} onGoogleSignIn={onGoogleSignIn} onLineSignIn={onLineSignIn} isFirstTimeUser={isFirstTimeUser} />;
     case 'knowledge':
       return <KnowledgePage />;
     case 'courses':
@@ -68,25 +75,20 @@ function renderPage(
       return <DonationPage />;
     case 'cartoon':
       return <CartoonPage />;
+    case 'settings':
+      return isAuthenticated ? <SettingsPage onLogout={onLogout} /> : <LoginPage onNavigate={onNavigate} onLoginSuccess={onLoginSuccess} onGoogleSignIn={onGoogleSignIn} onLineSignIn={onLineSignIn} isFirstTimeUser={isFirstTimeUser} />;
     default:
       return <HomePage onNavigate={onNavigate} />;
   }
 }
 
 export default function Page() {
+  const { data: session, status } = useSession();
   const [currentPage, setCurrentPage] = useState<string>(DEFAULT_PAGE);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  // Check authentication status on mount
-  useEffect(() => {
-    const checkAuthStatus = () => {
-      const token = localStorage.getItem('authToken');
-      setIsAuthenticated(!!token);
-    };
-
-    checkAuthStatus();
-  }, []);
+  const isAuthenticated = status === 'authenticated';
+  const userData = session?.user;
 
   // Check if user has visited before (first-time vs returning user)
   const [isFirstTimeUser, setIsFirstTimeUser] = useState<boolean>(() => {
@@ -98,8 +100,8 @@ export default function Page() {
     return true; // Default to first-time user for safety
   });
 
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
+  const handleLoginSuccess = async () => {
+    // Login is handled by NextAuth, this is mainly for navigation
     // Mark user as having visited before
     if (typeof window !== 'undefined') {
       localStorage.setItem('hasVisitedBefore', 'true');
@@ -108,23 +110,27 @@ export default function Page() {
 
   const handleLogout = async () => {
     try {
-      // Call API service logout method
-      await apiService.logout();
-
-      // Update authentication state
-      setIsAuthenticated(false);
-
-      // Navigate to home page
+      await signOut({ redirect: false });
       setCurrentPage('home');
-
       console.log('User logged out successfully');
     } catch (error) {
       console.error('Logout failed:', error);
+    }
+  };
 
-      // Even if API call fails, still remove token locally and update state
-      apiService.removeAuthToken();
-      setIsAuthenticated(false);
-      setCurrentPage('home');
+  const handleGoogleSignIn = async () => {
+    try {
+      await signIn('google', { callbackUrl: '/' });
+    } catch (error) {
+      console.error('Google sign in failed:', error);
+    }
+  };
+
+  const handleLineSignIn = async () => {
+    try {
+      await signIn('line', { callbackUrl: '/' });
+    } catch (error) {
+      console.error('LINE sign in failed:', error);
     }
   };
 
@@ -139,16 +145,22 @@ export default function Page() {
     }
   };
 
-  // Hide sidebar and header when on login page
-  const shouldShowLayout = isAuthenticated || currentPage !== 'profile';
+  // Hide sidebar and header when on auth pages
+  const shouldShowLayout = isAuthenticated || (currentPage !== 'profile' && currentPage !== 'login' && currentPage !== 'register');
 
   return (
     <div className="flex min-h-screen bg-background">
       {shouldShowLayout && <DesktopSidebar activePage={currentPage} onNavigate={handleNavigate} />}
       <div className={`${shouldShowLayout ? 'ml-64' : ''} flex-1 transition-all duration-300`}>
-        {shouldShowLayout && <DesktopHeader userName="John Doe" points={2450} level={5} onNavigate={handleNavigate} />}
+        {shouldShowLayout && <DesktopHeader
+      userName={userData?.name || 'John Doe'}
+      points={userData?.points || 2450}
+      level={userData?.level || 5}
+      isAuthenticated={isAuthenticated}
+      onNavigate={handleNavigate}
+    />}
         <main className={`${shouldShowLayout ? 'min-h-[calc(100vh-5rem)]' : 'min-h-screen'}`}>
-          {renderPage(currentPage, handleNavigate, isAuthenticated, handleLoginSuccess, handleLogout, isFirstTimeUser, searchQuery)}
+          {renderPage(currentPage, handleNavigate, isAuthenticated, handleLoginSuccess, handleLogout, handleGoogleSignIn, handleLineSignIn, isFirstTimeUser, searchQuery)}
         </main>
       </div>
     </div>

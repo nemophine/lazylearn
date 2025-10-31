@@ -17,6 +17,7 @@ import {
   DollarSign,
   Calendar,
   Smile,
+  Settings,
   ChevronRight
 } from 'lucide-react';
 import { useState } from 'react';
@@ -54,6 +55,7 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
     { id: 'certificate', icon: Award, label: 'Certificates' },
     { id: 'interaction', icon: Calendar, label: 'Schedule' },
     { id: 'donation', icon: DollarSign, label: 'Support Us' },
+    { id: 'settings', icon: Settings, label: 'Settings' },
   ];
 
   const NavItem = ({ item }: { item: typeof mainNavItems[0] }) => {
