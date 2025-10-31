@@ -135,147 +135,126 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      {/* Profile Header */}
-      <Card className="mb-6 bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)] border-0 shadow-lg overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Avatar className="w-20 h-20 border-4 border-white">
-              {(profileData.userImage && profileData.userImage !== "") && <AvatarImage src={profileData.userImage} />}
-              <AvatarFallback>
-                {profileData.userName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h2 className="text-white mb-1">{profileData.userName || 'Guest User'}</h2>
-              <p className="text-white/90 text-sm mb-2">{user?.email || 'Not logged in'}</p>
-              <div className="flex items-center gap-2 flex-wrap">
-                {userBadges.map((badge) => {
-                  const Icon = badge.icon;
-                  return (
-                    <Badge key={badge.id} className={badge.color}>
-                      <Icon className="w-3 h-3 mr-1" />
-                      {badge.name}
-                    </Badge>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 mb-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white/90 text-sm">Level Progress</span>
-              <span className="text-white">2,450 / 3,000 pts</span>
-            </div>
-            <Progress value={82} className="h-2 bg-white/20" />
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
-                <p className="text-2xl text-white mb-1">{stat.value}</p>
-                <p className="text-xs text-white/90">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Pet Companion Section */}
-      <Card className="mb-6 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">Pet Companion</h3>
-              <p className="text-sm text-muted-foreground">Your learning buddy</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Heart className="w-5 h-5 text-red-500 fill-current" />
-              <span className="text-sm font-medium text-red-500">85/100</span>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-[var(--teal-50)] to-[var(--mint)] rounded-2xl p-6 mb-4">
-            <div className="text-center">
-              <div className="w-24 h-24 mx-auto mb-4 bg-white rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-4xl">🐱</span>
-              </div>
-              <h4 className="font-semibold mb-2">Whiskers</h4>
-              <p className="text-sm text-muted-foreground mb-4">Happy and ready to learn!</p>
-
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div className="bg-[var(--teal-400)] h-2 rounded-full" style={{ width: '85%' }}></div>
+      {/* Profile Header and Pet Section */}
+      <div className="flex gap-6 mb-6">
+        <Card className="flex-1 bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)] border-0 shadow-lg overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <Avatar className="w-20 h-20 border-4 border-white">
+                {(profileData.userImage && profileData.userImage !== "") && <AvatarImage src={profileData.userImage} />}
+                <AvatarFallback>
+                  {profileData.userName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h2 className="text-white mb-1">{profileData.userName || 'Guest User'}</h2>
+                <p className="text-white/90 text-sm mb-2">{user?.email || 'Not logged in'}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {userBadges.map((badge) => {
+                    const Icon = badge.icon;
+                    return (
+                      <Badge key={badge.id} className={badge.color}>
+                        <Icon className="w-3 h-3 mr-1" />
+                        {badge.name}
+                      </Badge>
+                    );
+                  })}
                 </div>
-                <span className="text-xs text-muted-foreground">Happiness</span>
-              </div>
-
-              <div className="flex justify-center gap-2">
-                <button className="p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <span className="text-lg">🍎</span>
-                </button>
-                <button className="p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <span className="text-lg">🎾</span>
-                </button>
-                <button className="p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <span className="text-lg">📚</span>
-                </button>
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="bg-[var(--teal-50)] rounded-xl p-3">
-              <p className="text-2xl mb-1">🎯</p>
-              <p className="text-xs text-muted-foreground">Focus</p>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 mb-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-white/90 text-sm">Level Progress</span>
+                <span className="text-white">2,450 / 3,000 pts</span>
+              </div>
+              <Progress value={82} className="h-2 bg-white/20" />
             </div>
-            <div className="bg-[var(--teal-50)] rounded-xl p-3">
-              <p className="text-2xl mb-1">📈</p>
-              <p className="text-xs text-muted-foreground">Progress</p>
-            </div>
-            <div className="bg-[var(--teal-50)] rounded-xl p-3">
-              <p className="text-2xl mb-1">⭐</p>
-              <p className="text-xs text-muted-foreground">Points</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Virtual Pet Section */}
-      <Card className="mb-6 bg-gradient-to-br from-[var(--teal-50)] to-white border-[var(--teal-200)]">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
-                <Heart className="w-5 h-5 text-[var(--teal-500)]" />
-                Your Learning Companion
-              </h3>
-              <p className="text-sm text-muted-foreground">Your virtual pet grows as you learn!</p>
+            <div className="grid grid-cols-3 gap-3">
+              {stats.map((stat, index) => (
+                <div key={index} className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+                  <p className="text-2xl text-white mb-1">{stat.value}</p>
+                  <p className="text-xs text-white/90">{stat.label}</p>
+                </div>
+              ))}
             </div>
-            <Link href="/focus">
-              <Button variant="outline" size="sm" className="border-[var(--teal-300)] text-[var(--teal-600)] hover:bg-[var(--teal-50)]">
-                Visit Focus Mode
-              </Button>
-            </Link>
-          </div>
 
-          <div className="flex justify-center">
-            <PixelPet
-              isFocusActive={false}
-              focusTime={0}
-              onStatsUpdate={(stats) => {
-                console.log('Pet stats updated in profile:', stats);
-              }}
-            />
-          </div>
+            <div className="mt-4 pt-4 border-t border-white/20">
+              <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                🏆 Certificates
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm flex items-center gap-3">
+                  <div className="text-2xl">
+                    🏆
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium text-sm">React Development</p>
+                    <p className="text-gray-600 text-xs">Completed Dec 2024</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm flex items-center gap-3">
+                  <div className="text-2xl">
+                    🏆
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium text-sm">Python Programming</p>
+                    <p className="text-gray-600 text-xs">Completed Nov 2024</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm flex items-center gap-3">
+                  <div className="text-2xl">
+                    🏆
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium text-sm">JavaScript Fundamentals</p>
+                    <p className="text-gray-600 text-xs">Completed Oct 2024</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm flex items-center gap-3">
+                  <div className="text-2xl">
+                    🏆
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium text-sm">Web Development Basics</p>
+                    <p className="text-gray-600 text-xs">Completed Sep 2024</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm flex items-center gap-3">
+                  <div className="text-2xl">
+                    🏆
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium text-sm">Database Design</p>
+                    <p className="text-gray-600 text-xs">Completed Aug 2024</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm flex items-center gap-3">
+                  <div className="text-2xl">
+                    🏆
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium text-sm">CSS & Responsive Design</p>
+                    <p className="text-gray-600 text-xs">Completed Jul 2024</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          <div className="text-center mt-4">
-            <p className="text-xs text-muted-foreground">
-              Your companion thrives when you're in focus mode! 🌱
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Virtual Pet Section */}
+        <div className="w-80 flex items-center justify-center">
+          <PixelPet
+            isFocusActive={false}
+            focusTime={0}
+            onStatsUpdate={(stats) => {
+              console.log('Pet stats updated in profile:', stats);
+            }}
+          />
+        </div>
+      </div>
 
       {/* Achievements Section */}
       <Card className="mb-6">
