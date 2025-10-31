@@ -130,7 +130,7 @@ export function DesktopSidebar({ activePage, onNavigate }: DesktopSidebarProps) 
   ];
 
   const learningItems: SidebarItem[] = [
-    { id: 'knowledge', icon: Video, label: 'Video Lessons' },
+    { id: 'courses', icon: Video, label: 'Courses' },
     { id: 'game', icon: Gamepad2, label: 'Games & Quiz' },
     { id: 'search', icon: Search, label: 'Search' },
     { id: 'teacher', icon: GraduationCap, label: 'Line Teacher' },

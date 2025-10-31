@@ -13,6 +13,10 @@ import { ProfilePage } from './components/pages/ProfilePage';
 import { SettingsPage } from './components/pages/SettingsPage';
 import { KnowledgePage } from './components/pages/KnowledgePage';
 import { CoursePage } from './components/pages/CoursePage';
+import { CategoryOverviewPage } from './components/pages/CategoryOverviewPage';
+import { CategoryCoursesPage } from './components/pages/CategoryCoursesPage';
+import { CourseVideosPage } from './components/pages/CourseVideosPage';
+import { VideoPlayerPage } from './components/pages/VideoPlayerPage';
 import { GameQuizPage } from './components/pages/GameQuizPage';
 import { SearchPage } from './components/pages/SearchPage';
 import { TeacherPage } from './components/pages/TeacherPage';
@@ -29,7 +33,7 @@ const DEFAULT_PAGE = 'home';
 
 function renderPage(
   page: string,
-  onNavigate: (next: string, query?: string) => void,
+  onNavigate: (next: string, params?: any) => void,
   isAuthenticated: boolean,
   onLoginSuccess: () => void,
   onLogout: () => void,
@@ -37,6 +41,7 @@ function renderPage(
   onLineSignIn: () => void,
   isFirstTimeUser: boolean,
   searchQuery?: string,
+  pageParams?: any,
 ): JSX.Element {
   switch (page) {
     case 'home':
@@ -58,7 +63,13 @@ function renderPage(
     case 'knowledge':
       return <KnowledgePage />;
     case 'courses':
-      return <CoursePage onNavigate={onNavigate} />;
+      return <CategoryOverviewPage onNavigate={onNavigate} />;
+    case 'category-courses':
+      return <CategoryCoursesPage onNavigate={onNavigate} category={pageParams?.category} />;
+    case 'course-videos':
+      return <CourseVideosPage onNavigate={onNavigate} category={pageParams?.category} courseId={pageParams?.courseId} />;
+    case 'video-player':
+      return <VideoPlayerPage onNavigate={onNavigate} category={pageParams?.category} courseId={pageParams?.courseId} videoId={pageParams?.videoId} />;
     case 'game':
       return <GameQuizPage />;
     case 'search':
@@ -86,6 +97,7 @@ export default function Page() {
   const { data: session, status } = useSession();
   const [currentPage, setCurrentPage] = useState<string>(DEFAULT_PAGE);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [pageParams, setPageParams] = useState<any>(null);
 
   const isAuthenticated = status === 'authenticated';
   const userData = session?.user;
@@ -133,12 +145,16 @@ export default function Page() {
     }
   };
 
-  const handleNavigate = (page: string, query?: string) => {
-    console.log('Main navigation called:', { page, query });
+  const handleNavigate = (page: string, params?: any) => {
+    console.log('Main navigation called:', { page, params });
     setCurrentPage(page);
-    if (query) {
-      setSearchQuery(query);
+
+    // Handle search query for backward compatibility
+    if (typeof params === 'string') {
+      setSearchQuery(params);
+      setPageParams(null);
     } else {
+      setPageParams(params);
       // Clear search query when navigating without a query
       setSearchQuery('');
     }
@@ -159,7 +175,7 @@ export default function Page() {
           onNavigate={handleNavigate}
         />}
         <main className={`${shouldShowLayout ? 'min-h-[calc(100vh-5rem)]' : 'min-h-screen'}`}>
-          {renderPage(currentPage, handleNavigate, isAuthenticated, handleLoginSuccess, handleLogout, handleGoogleSignIn, handleLineSignIn, isFirstTimeUser, searchQuery)}
+          {renderPage(currentPage, handleNavigate, isAuthenticated, handleLoginSuccess, handleLogout, handleGoogleSignIn, handleLineSignIn, isFirstTimeUser, searchQuery, pageParams)}
         </main>
       </div>
     </div>

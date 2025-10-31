@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, Clock, Users, Star, Play, Lock, ChevronDown, ChevronUp, CheckCircle, Circle, Code, Smartphone, FlaskConical, Palette, Briefcase } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, Users, Star, Play, Lock, ChevronDown, ChevronUp, CheckCircle, Circle } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -28,21 +28,21 @@ interface Course {
   isEnrolled: boolean;
   isLocked: boolean;
   videos: Video[];
-  category: string;
 }
 
-interface CoursePageProps {
-  onNavigate: (page: string) => void;
+interface CategoryCoursesPageProps {
+  onNavigate: (page: string, params?: any) => void;
+  category?: string;
 }
 
-export function CoursePage({ onNavigate }: CoursePageProps) {
+export function CategoryCoursesPage({ onNavigate, category }: CategoryCoursesPageProps) {
   const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
 
-  const coursesByCategory = {
+  const coursesByCategory: Record<string, Course[]> = {
     'Web Development': [
       {
         id: 1,
-        title: 'Complete Web Development Bootcamp',
+        title: '🌐 Complete Web Development Bootcamp 2024 - HTML, CSS, JavaScript, React & More',
         instructor: 'John Smith',
         rating: 4.8,
         students: 15420,
@@ -64,7 +64,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
       },
       {
         id: 2,
-        title: 'Advanced JavaScript & TypeScript',
+        title: '⚡ Advanced JavaScript & TypeScript Mastery - From Junior to Senior Developer',
         instructor: 'Sarah Johnson',
         rating: 4.9,
         students: 8750,
@@ -84,7 +84,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
       },
       {
         id: 7,
-        title: 'Node.js Backend Development',
+        title: '🚀 Node.js Backend Development - Build Scalable APIs & Microservices',
         instructor: 'David Wilson',
         rating: 4.7,
         students: 12300,
@@ -106,7 +106,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
     'Mobile Apps': [
       {
         id: 5,
-        title: 'React Native Mobile Development',
+        title: '📱 React Native Mobile Development - Build iOS & Android Apps with JavaScript',
         instructor: 'Alex Thompson',
         rating: 4.6,
         students: 9200,
@@ -126,7 +126,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
       },
       {
         id: 8,
-        title: 'Flutter Complete Course',
+        title: '🦋 Flutter Complete Course - Build Beautiful Cross-Platform Mobile Apps',
         instructor: 'Maria Garcia',
         rating: 4.8,
         students: 7800,
@@ -148,7 +148,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
     'Data Science': [
       {
         id: 4,
-        title: 'Python for Data Science & ML',
+        title: '🔬 Python for Data Science & Machine Learning - Complete Practical Guide',
         instructor: 'Michael Davis',
         rating: 4.9,
         students: 18900,
@@ -168,7 +168,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
       },
       {
         id: 9,
-        title: 'Machine Learning A-Z',
+        title: '🤖 Machine Learning A-Z - From Beginner to Advanced in One Course',
         instructor: 'Robert Chen',
         rating: 4.9,
         students: 25600,
@@ -190,7 +190,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
     'Design': [
       {
         id: 3,
-        title: 'UI/UX Design Masterclass',
+        title: '🎨 UI/UX Design Masterclass - Create Beautiful User Interfaces & Experiences',
         instructor: 'Emily Chen',
         rating: 4.7,
         students: 12300,
@@ -210,7 +210,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
       },
       {
         id: 10,
-        title: 'Graphic Design Bootcamp',
+        title: '🖌️ Graphic Design Bootcamp - Master Adobe Creative Suite & Professional Design',
         instructor: 'Jessica Miller',
         rating: 4.6,
         students: 8900,
@@ -232,7 +232,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
     'Business': [
       {
         id: 6,
-        title: 'Digital Marketing Strategy',
+        title: '📈 Digital Marketing Strategy - Grow Your Business with Online Marketing',
         instructor: 'Lisa Martinez',
         rating: 4.5,
         students: 15600,
@@ -252,7 +252,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
       },
       {
         id: 11,
-        title: 'Project Management Professional',
+        title: '🎯 Project Management Professional (PMP) - Complete Certification Guide',
         instructor: 'Thomas Anderson',
         rating: 4.8,
         students: 11200,
@@ -273,195 +273,173 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
     ]
   };
 
-  const categories = [
-    { name: 'Web Development', icon: Code, color: 'from-blue-500 to-blue-600', count: coursesByCategory['Web Development'].length },
-    { name: 'Mobile Apps', icon: Smartphone, color: 'from-purple-500 to-purple-600', count: coursesByCategory['Mobile Apps'].length },
-    { name: 'Data Science', icon: FlaskConical, color: 'from-green-500 to-green-600', count: coursesByCategory['Data Science'].length },
-    { name: 'Design', icon: Palette, color: 'from-pink-500 to-pink-600', count: coursesByCategory['Design'].length },
-    { name: 'Business', icon: Briefcase, color: 'from-orange-500 to-orange-600', count: coursesByCategory['Business'].length }
-  ];
+  const categoryInfo: Record<string, { color: string; bgColor: string; description: string }> = {
+    'Web Development': {
+      color: 'from-blue-500 to-blue-600',
+      bgColor: 'bg-blue-50',
+      description: 'Master modern web technologies and build amazing applications'
+    },
+    'Mobile Apps': {
+      color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      description: 'Create native and cross-platform mobile applications'
+    },
+    'Data Science': {
+      color: 'from-green-500 to-green-600',
+      bgColor: 'bg-green-50',
+      description: 'Dive into data analysis, machine learning, and AI'
+    },
+    'Design': {
+      color: 'from-pink-500 to-pink-600',
+      bgColor: 'bg-pink-50',
+      description: 'Learn UI/UX design and creative tools'
+    },
+    'Business': {
+      color: 'from-orange-500 to-orange-600',
+      bgColor: 'bg-orange-50',
+      description: 'Develop business acumen and professional skills'
+    }
+  };
+
+  const courses = category ? coursesByCategory[category] : [];
+  const info = category ? categoryInfo[category] : null;
+
+  const handleCourseClick = (courseId: number) => {
+    onNavigate('course-videos', { category, courseId });
+  };
+
+  if (!category || !info || courses.length === 0) {
+    return (
+      <div className="p-8 max-w-7xl mx-auto">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Category not found</h1>
+          <Button onClick={() => onNavigate('courses')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Categories
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Course Categories</h1>
-        <p className="text-muted-foreground">Choose a category and enroll in courses that match your interests</p>
+      {/* Back Button */}
+      <Button
+        variant="outline"
+        className="mb-6"
+        onClick={() => onNavigate('courses')}
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Categories
+      </Button>
+
+      {/* Category Header */}
+      <div className={`mb-8 p-8 bg-gradient-to-r ${info.color} rounded-2xl text-white`}>
+        <h1 className="text-3xl font-bold mb-2">{category}</h1>
+        <p className="text-white/90 text-lg mb-4">{info.description}</p>
+        <div className="flex items-center gap-6">
+          <div>
+            <p className="text-2xl font-bold">{courses.length}</p>
+            <p className="text-white/80 text-sm">Courses Available</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold">
+              {courses.reduce((total, course) => total + parseInt(course.duration), 0)}h
+            </p>
+            <p className="text-white/80 text-sm">Total Content</p>
+          </div>
+        </div>
       </div>
 
-      {/* Categories with Courses */}
-      <div className="space-y-8">
-        {categories.map((category) => {
-          const CategoryIcon = category.icon;
-          const categoryCourses = coursesByCategory[category.name];
+      {/* Courses Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {courses.map((course) => (
+          <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleCourseClick(course.id)}>
+            {/* Course Image */}
+            <div className="relative">
+              <img
+                src={course.image}
+                alt={course.title}
+                className="w-full h-48 object-cover"
+              />
+              {course.isLocked && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <Lock className="w-8 h-8 text-white" />
+                </div>
+              )}
+              {course.isEnrolled && course.progress > 0 && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                  <div className="bg-white/20 rounded-full h-2">
+                    <div
+                      className="bg-white h-2 rounded-full transition-all"
+                      style={{ width: `${course.progress}%` }}
+                    />
+                  </div>
+                  <p className="text-white text-xs mt-1">{course.progress}% complete</p>
+                </div>
+              )}
+            </div>
 
-          return (
-            <Card key={category.name} className="overflow-hidden">
-              {/* Category Header */}
-              <div className={`bg-gradient-to-r ${category.color} p-6 text-white`}>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <CategoryIcon className="w-6 h-6" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold mb-1">{category.name}</h2>
-                    <p className="text-white/80">{category.count} courses available</p>
-                  </div>
-                  <Badge className="bg-white/20 text-white border-0 px-4 py-2">
-                    {category.name}
-                  </Badge>
+            <CardContent className="p-5">
+              {/* Course Title */}
+              <h3 className="font-semibold text-lg mb-2 line-clamp-2">{course.title}</h3>
+
+              {/* Instructor */}
+              <p className="text-sm text-muted-foreground mb-3">{course.instructor}</p>
+
+              {/* Course Stats */}
+              <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                  <span>{course.rating}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Users className="w-4 h-4" />
+                  <span>{course.students.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  <span>{course.duration}</span>
                 </div>
               </div>
 
-              {/* Courses Grid in Category */}
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {categoryCourses.map((course) => (
-                    <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                      {/* Course Image */}
-                      <div className="relative">
-                        <img
-                          src={course.image}
-                          alt={course.title}
-                          className="w-full h-40 object-cover"
-                        />
-                        {course.isLocked && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <Lock className="w-6 h-6 text-white" />
-                          </div>
-                        )}
-                        {course.isEnrolled && course.progress > 0 && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
-                            <div className="bg-white/20 rounded-full h-2">
-                              <div
-                                className="bg-white h-2 rounded-full transition-all"
-                                style={{ width: `${course.progress}%` }}
-                              />
-                            </div>
-                            <p className="text-white text-xs mt-1">{course.progress}% complete</p>
-                          </div>
-                        )}
-                      </div>
+              {/* Level Badge */}
+              <div className="mb-4">
+                <Badge variant="secondary" className="border-0">
+                  {course.level}
+                </Badge>
+              </div>
 
-                      <CardContent className="p-4">
-                        {/* Course Title */}
-                        <h3 className="font-semibold text-base mb-2 line-clamp-2">{course.title}</h3>
+              {/* Video Count */}
+              <div className="mb-4">
+                <p className="text-sm text-muted-foreground">
+                  {course.videos.length} video lessons
+                </p>
+              </div>
 
-                        {/* Instructor */}
-                        <p className="text-xs text-muted-foreground mb-3">{course.instructor}</p>
-
-                        {/* Course Stats */}
-                        <div className="flex items-center gap-3 mb-3 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                            <span>{course.rating}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="w-3 h-3" />
-                            <span>{course.students.toLocaleString()}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{course.duration}</span>
-                          </div>
-                        </div>
-
-                        {/* Level Badge */}
-                        <div className="mb-3">
-                          <Badge variant="secondary" className="border-0 text-xs">
-                            {course.level}
-                          </Badge>
-                        </div>
-
-                        {/* Show Videos Button (for enrolled courses) */}
-                        {course.isEnrolled && (
-                          <Button
-                            variant="outline"
-                            className="w-full rounded-xl h-9 mb-3 text-xs"
-                            onClick={() => setExpandedCourse(expandedCourse === course.id ? null : course.id)}
-                          >
-                            {expandedCourse === course.id ? (
-                              <>
-                                <ChevronUp className="w-3 h-3 mr-1" />
-                                Hide ({course.videos.length})
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="w-3 h-3 mr-1" />
-                                Videos ({course.videos.length})
-                              </>
-                            )}
-                          </Button>
-                        )}
-
-                        {/* Video List (when expanded) */}
-                        {expandedCourse === course.id && (
-                          <div className="mb-3 max-h-48 overflow-y-auto border rounded-lg p-2 bg-[var(--teal-50)]">
-                            <h4 className="font-medium text-xs mb-2">Course Videos:</h4>
-                            <div className="space-y-1">
-                              {course.videos.map((video, index) => (
-                                <div
-                                  key={video.id}
-                                  className={`flex items-center gap-2 p-1 rounded transition-colors ${
-                                    video.isLocked
-                                      ? 'bg-gray-100 opacity-60 cursor-not-allowed'
-                                      : 'bg-white hover:bg-[var(--teal-100)] cursor-pointer'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-1">
-                                    {video.isCompleted ? (
-                                      <CheckCircle className="w-3 h-3 text-green-500" />
-                                    ) : video.isLocked ? (
-                                      <Lock className="w-3 h-3 text-gray-400" />
-                                    ) : (
-                                      <Circle className="w-3 h-3 text-gray-400" />
-                                    )}
-                                    <span className="text-xs text-muted-foreground w-4">
-                                      {index + 1}.
-                                    </span>
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className={`text-xs truncate ${video.isLocked ? 'text-gray-500' : 'text-foreground'}`}>
-                                      {video.title}
-                                    </p>
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">
-                                    {video.duration}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Action Button */}
-                        {course.isEnrolled ? (
-                          <Button
-                            className="w-full rounded-xl h-9 text-xs"
-                            onClick={() => onNavigate('knowledge')}
-                          >
-                            <Play className="w-3 h-3 mr-1" />
-                            {course.progress > 0 ? 'Continue' : 'Start'}
-                          </Button>
-                        ) : course.isLocked ? (
-                          <Button variant="outline" className="w-full rounded-xl h-9 text-xs" disabled>
-                            <Lock className="w-3 h-3 mr-1" />
-                            Locked
-                          </Button>
-                        ) : (
-                          <Button className="w-full rounded-xl h-9 text-xs">
-                            <BookOpen className="w-3 h-3 mr-1" />
-                            Enroll ${course.price}
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              {/* Action Button */}
+              {course.isEnrolled ? (
+                <Button
+                  className="w-full rounded-xl h-11"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
+                </Button>
+              ) : course.isLocked ? (
+                <Button variant="outline" className="w-full rounded-xl h-11" disabled>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Locked
+                </Button>
+              ) : (
+                <Button className="w-full rounded-xl h-11">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Enroll for ${course.price}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
