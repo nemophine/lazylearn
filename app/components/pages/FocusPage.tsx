@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import AudioPlayer from '../AudioPlayer';
 import ProfessionalAudioPlayer from '../ProfessionalAudioPlayer';
 import FocusFloatingButton from '../FocusFloatingButton';
+import PixelPet from '../PixelPet';
 
 // Simple Pet interface instead of import
 interface Pet {
@@ -45,7 +46,7 @@ const savePetData = (pet: Pet): void => {
 
 const createDefaultPet = (): Pet => ({
   id: 'pet-' + Date.now(),
-  name: 'Whiskers',
+  name: 'Buddy',
   type: 'cat',
   level: 1,
   health: 100,
@@ -112,7 +113,7 @@ export function FocusPage() {
   // Update pet display based on real pet data
   const getPetDisplay = () => {
     if (!currentPet) {
-      return { emoji: '🐱', name: 'Whiskers', level: 1, mood: 'Happy' };
+      return { emoji: '🐱', name: 'Buddy', level: 1, mood: 'Happy' };
     }
 
     // Simple pet configuration instead of PET_CONFIGS
@@ -457,7 +458,7 @@ export function FocusPage() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-400 to-teal-300 rounded-2xl text-white hover:shadow-lg hover:scale-105 transition-all duration-200">
+                <button className="flex items-center gap-2 px-4 py-2.5 bg-orange-500 rounded-2xl text-white hover:shadow-lg hover:scale-105 transition-all duration-200">
                   <Flame className="w-5 h-5" />
                   <span>{streakDays} days</span>
                 </button>
@@ -472,46 +473,7 @@ export function FocusPage() {
             </Tooltip>
           </TooltipProvider>
 
-          {/* Pet Icon with Hover & Quick Actions */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-300 to-teal-200 rounded-2xl">
-                  <span className="text-2xl">{selectedPet.emoji}</span>
-                  <span className="text-foreground">{selectedPet.name}</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-white border-teal-200 shadow-lg">
-                <div className="text-center p-2">
-                  <p className="mb-1">{selectedPet.name}</p>
-                  <p className="text-sm text-muted-foreground">Level {selectedPet.level}</p>
-                  <p className="text-sm text-muted-foreground">Mood: {selectedPet.mood}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Click dropdown for actions</p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-teal-300 to-teal-200 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200">
-                <ChevronDown className="w-4 h-4 text-foreground" />
-              </button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end" className="w-48 bg-white border-teal-200 rounded-2xl shadow-lg">
-              <DropdownMenuItem className="rounded-xl cursor-pointer">
-                <span className="mr-2">🍖</span> Feed Pet
-              </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-xl cursor-pointer">
-                <span className="mr-2">🎾</span> Play
-              </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-xl cursor-pointer">
-                <span className="mr-2">🔄</span> Change Pet
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+          </div>
       </div>
 
       {/* Course Progress Mini Card */}
@@ -1115,73 +1077,15 @@ export function FocusPage() {
 
         {/* Right Sidebar - Simplified */}
         <div className="space-y-6">
-          {/* Virtual Pet Display */}
-          <Card className="overflow-hidden border-teal-200">
-            <CardContent className="p-6 bg-gradient-to-br from-teal-300 to-teal-200 text-center">
-              <h4 className="text-foreground mb-3">Your Focus Buddy</h4>
-              <div className={`text-8xl mb-4 ${getPetAnimation()}`}>{selectedPet.emoji}</div>
-              <p className="text-foreground mb-2">{selectedPet.name}</p>
-              <Badge variant="secondary" className="bg-[rgba(255,255,255,0.6)] text-foreground border-0 mb-4">
-                Level {selectedPet.level} • {selectedPet.mood}
-              </Badge>
-
-              {/* Real Pet Status Bars */}
-              {currentPet && (
-                <div className="bg-[rgba(255,255,255,0.6)] backdrop-blur-sm rounded-2xl p-4 space-y-3">
-                  <div className="text-sm font-medium text-foreground mb-2">Pet Status</div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs">❤️ Health</span>
-                      <span className="text-xs">{currentPet.health}%</span>
-                    </div>
-                    <Progress value={currentPet.health} className="h-1" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs">🍖 Hunger</span>
-                      <span className="text-xs">{currentPet.hunger}%</span>
-                    </div>
-                    <Progress value={currentPet.hunger} className="h-1" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs">⚡ Energy</span>
-                      <span className="text-xs">{currentPet.energy}%</span>
-                    </div>
-                    <Progress value={currentPet.energy} className="h-1" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs">🧼 Clean</span>
-                      <span className="text-xs">{currentPet.clean}%</span>
-                    </div>
-                    <Progress value={currentPet.clean} className="h-1" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs">😊 Happy</span>
-                      <span className="text-xs">{currentPet.happy}%</span>
-                    </div>
-                    <Progress value={currentPet.happy} className="h-1" />
-                  </div>
-
-                  {/* EXP Progress */}
-                  <div className="mt-4 pt-3 border-t border-[rgba(255,255,255,0.3)]">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs font-medium">Level Progress</span>
-                      <span className="text-xs">{currentPet.exp}/{currentPet.level * 200} XP</span>
-                    </div>
-                    <Progress value={(currentPet.exp / (currentPet.level * 200)) * 100} className="h-2" />
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Virtual Pet Display - Pixel Pet */}
+          <PixelPet
+            isFocusActive={isRunning && !isLocked}
+            focusTime={time}
+            onStatsUpdate={(stats) => {
+              // Optional: Handle pet stats updates if needed
+              console.log('Pet stats updated:', stats);
+            }}
+          />
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3">
@@ -1217,7 +1121,8 @@ export function FocusPage() {
               </ul>
             </CardContent>
           </Card>
-        </div>
+
+          </div>
       </div>
 
       {/* Focus Floating Button - appears when timer is running */}
