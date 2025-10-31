@@ -49,14 +49,42 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
       });
     };
 
-    // Add event listener
+    // Listen for logout events
+    const handleLogoutEvent = () => {
+      // Clear localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+      // Reset to guest state
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+    };
+
+    // Add event listeners
     window.addEventListener('profileUpdated', handleProfileUpdate as EventListener);
+    window.addEventListener('userLoggedOut', handleLogoutEvent as EventListener);
 
     // Cleanup
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
+      window.removeEventListener('userLoggedOut', handleLogoutEvent as EventListener);
     };
   }, [user?.name, user?.image]);
+
+  // Reset to guest when session changes
+  useEffect(() => {
+    if (!session) {
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+    }
+  }, [session]);
 
   // User badges - in a real app this would come from user data/database
   const userBadges = [
@@ -67,6 +95,12 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
   const handleLogout = async () => {
     try {
       await signOut({ redirect: false });
+      // Clear localStorage and dispatch logout event
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+        // Dispatch logout event for other components
+        window.dispatchEvent(new CustomEvent('userLoggedOut', {}));
+      }
       if (onLogout) {
         onLogout();
       }

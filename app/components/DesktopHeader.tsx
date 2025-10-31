@@ -55,14 +55,42 @@ export function DesktopHeader({ userName, points, level = 5, userImage, isAuthen
       });
     };
 
-    // Add event listener
+    // Listen for logout events
+    const handleLogout = () => {
+      // Clear localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+      // Reset to guest state
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+    };
+
+    // Add event listeners
     window.addEventListener('profileUpdated', handleProfileUpdate as EventListener);
+    window.addEventListener('userLoggedOut', handleLogout as EventListener);
 
     // Cleanup
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
+      window.removeEventListener('userLoggedOut', handleLogout as EventListener);
     };
   }, [userName, userImage]);
+
+  // Reset to guest when authentication changes
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+    }
+  }, [isAuthenticated]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

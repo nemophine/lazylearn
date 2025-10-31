@@ -50,14 +50,42 @@ export function HomePage({ onNavigate }: HomePageProps) {
       });
     };
 
-    // Add event listener
+    // Listen for logout events
+    const handleLogout = () => {
+      // Clear localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+      // Reset to guest state
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+    };
+
+    // Add event listeners
     window.addEventListener('profileUpdated', handleProfileUpdate as EventListener);
+    window.addEventListener('userLoggedOut', handleLogout as EventListener);
 
     // Cleanup
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
+      window.removeEventListener('userLoggedOut', handleLogout as EventListener);
     };
   }, [user?.name, user?.image]);
+
+  // Reset to guest when session changes
+  useEffect(() => {
+    if (!session) {
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+    }
+  }, [session]);
 
   const categories = [
     { icon: Brain, label: 'Science', tooltip: 'Explore biology, physics, chemistry and more' },

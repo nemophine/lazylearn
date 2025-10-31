@@ -79,14 +79,42 @@ export function SettingsPage({ onLogout }: SettingsPageProps) {
       });
     };
 
-    // Add event listener
+    // Listen for logout events
+    const handleLogout = () => {
+      // Clear localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+      // Reset to guest state
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+    };
+
+    // Add event listeners
     window.addEventListener('profileUpdated', handleProfileUpdate as EventListener);
+    window.addEventListener('userLoggedOut', handleLogout as EventListener);
 
     // Cleanup
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
+      window.removeEventListener('userLoggedOut', handleLogout as EventListener);
     };
   }, [user?.name, user?.image]);
+
+  // Reset to guest when session changes
+  useEffect(() => {
+    if (!session) {
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+    }
+  }, [session]);
 
   const [settings, setSettings] = useState({
     notifications: true,
@@ -350,7 +378,14 @@ export function SettingsPage({ onLogout }: SettingsPageProps) {
         <Button
           variant="outline"
           className="rounded-xl h-12 text-destructive border-destructive/30 hover:bg-destructive/10 px-8"
-          onClick={onLogout}
+          onClick={() => {
+            // Clear localStorage and dispatch logout event
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('userProfile');
+              window.dispatchEvent(new CustomEvent('userLoggedOut', {}));
+            }
+            onLogout();
+          }}
         >
           <SettingsIcon className="w-5 h-5 mr-2" />
           Sign Out
