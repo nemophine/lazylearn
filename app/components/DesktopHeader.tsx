@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, BookOpen, Coins, Lock, Search, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -49,6 +49,7 @@ export function DesktopHeader({ userName, points, level = 5, userImage, isAuthen
     // Listen for profile updates
     const handleProfileUpdate = (event: CustomEvent) => {
       const updatedProfile = event.detail;
+      console.log('DesktopHeader received profileUpdated event:', updatedProfile);
       setProfileData({
         userName: updatedProfile.name || userName,
         userImage: updatedProfile.image || userImage

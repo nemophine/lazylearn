@@ -73,6 +73,7 @@ export function SettingsPage({ onLogout }: SettingsPageProps) {
     // Listen for profile updates
     const handleProfileUpdate = (event: CustomEvent) => {
       const updatedProfile = event.detail;
+      console.log('SettingsPage received profileUpdated event:', updatedProfile);
       setProfileData({
         userName: updatedProfile.name || user?.name || '',
         userImage: updatedProfile.image || user?.image || ''

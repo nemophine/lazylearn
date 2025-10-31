@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import {
   Camera,
   Save,
@@ -35,6 +36,7 @@ interface EditProfilePageProps {
 export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
   const { data: session } = useSession();
   const user = session?.user;
+  const router = useRouter();
 
   // Profile editing state
   const [editName, setEditName] = useState(user?.name || '');
@@ -107,6 +109,7 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
       // This simulates updating the user session
       if (typeof window !== 'undefined') {
         // Trigger a custom event that other components can listen to
+        console.log('Dispatching profileUpdated event with data:', profileData);
         window.dispatchEvent(new CustomEvent('profileUpdated', {
           detail: profileData
         }));
@@ -117,9 +120,9 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
       // Show success message
       setSaveMessage('Profile saved successfully!');
 
-      // Navigate back to settings after a short delay and refresh
+      // Navigate back to settings after a short delay
       setTimeout(() => {
-        window.location.href = '/settings';
+        router.push('/settings');
       }, 1500);
 
     } catch (error) {
