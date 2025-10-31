@@ -1,6 +1,7 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import { User, Bell, Lock, LogOut, ChevronRight, Heart, Sparkles, Star, Trophy, Zap, Target, Award, Crown, Gift, Coins, Medal } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -8,6 +9,7 @@ import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
 import { Progress } from '../ui/progress';
 import { Button } from '../ui/button';
+import Link from 'next/link';
 
 interface ProfilePageProps {
   onLogout?: () => void;
@@ -16,6 +18,45 @@ interface ProfilePageProps {
 export function ProfilePage({ onLogout }: ProfilePageProps) {
   const { data: session } = useSession();
   const user = session?.user;
+
+  // State for dynamically updated profile data
+  const [profileData, setProfileData] = useState({ userName: user?.name || '', userImage: user?.image || '' });
+
+  // Load profile data from localStorage and listen for updates
+  useEffect(() => {
+    // Load initial profile data
+    if (typeof window !== 'undefined') {
+      const savedProfile = localStorage.getItem('userProfile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          setProfileData({
+            userName: profile.name || user?.name || '',
+            userImage: profile.image || user?.image || ''
+          });
+        } catch (error) {
+          console.error('Error loading profile from localStorage:', error);
+        }
+      }
+    }
+
+    // Listen for profile updates
+    const handleProfileUpdate = (event: CustomEvent) => {
+      const updatedProfile = event.detail;
+      setProfileData({
+        userName: updatedProfile.name || user?.name || '',
+        userImage: updatedProfile.image || user?.image || ''
+      });
+    };
+
+    // Add event listener
+    window.addEventListener('profileUpdated', handleProfileUpdate as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
+    };
+  }, [user?.name, user?.image]);
 
   // User badges - in a real app this would come from user data/database
   const userBadges = [
@@ -40,11 +81,17 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
     { label: 'Rank', value: '#47' },
   ];
 
+  // Account settings section
   const settingsSections = [
     {
-      title: 'Account',
+      title: 'Account Settings',
       items: [
-        { icon: User, label: 'Edit Profile', hasArrow: true },
+        {
+          icon: User,
+          label: 'Edit Profile',
+          hasArrow: true,
+          href: '/edit-profile'
+        },
         { icon: Bell, label: 'Notifications', hasToggle: true, enabled: true },
         { icon: Lock, label: 'Privacy & Security', hasArrow: true },
       ]
@@ -58,13 +105,13 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <Avatar className="w-20 h-20 border-4 border-white">
-              {(user?.image && user.image !== "") && <AvatarImage src={user.image} />}
+              {(profileData.userImage && profileData.userImage !== "") && <AvatarImage src={profileData.userImage} />}
               <AvatarFallback>
-                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                {profileData.userName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="text-white mb-1">{user?.name || 'Guest User'}</h2>
+              <h2 className="text-white mb-1">{profileData.userName || 'Guest User'}</h2>
               <p className="text-white/90 text-sm mb-2">{user?.email || 'Not logged in'}</p>
               <div className="flex items-center gap-2 flex-wrap">
                 {userBadges.map((badge) => {
@@ -217,6 +264,50 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Account Settings Section */}
+      <Card className="mb-6">
+        <CardContent className="p-0">
+          {settingsSections.map((section, sectionIndex) => (
+            <div key={sectionIndex}>
+              <div className="p-4 border-b border-border">
+                <h3 className="text-lg font-semibold">{section.title}</h3>
+              </div>
+              {section.items.map((item, itemIndex) => {
+                const Icon = item.icon;
+                const ItemContent = item.href ? Link : 'div';
+                const itemProps = item.href ? { href: item.href } : {};
+
+                return (
+                  <ItemContent
+                    key={itemIndex}
+                    {...itemProps}
+                    className={`flex items-center gap-4 p-4 hover:bg-[var(--teal-50)] transition-colors cursor-pointer ${
+                      itemIndex !== section.items.length - 1 ? 'border-b border-border' : ''
+                    }`}
+                  >
+                    <div className="w-12 h-12 bg-[var(--teal-100)] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6 text-[var(--teal-600)]" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{item.label}</h4>
+                    </div>
+                    {item.hasToggle && (
+                      <Switch
+                        checked={item.enabled}
+                        onCheckedChange={() => {}}
+                      />
+                    )}
+                    {item.hasArrow && (
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    )}
+                  </ItemContent>
+                );
+              })}
+            </div>
+          ))}
         </CardContent>
       </Card>
 
