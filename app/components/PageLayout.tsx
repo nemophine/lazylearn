@@ -8,9 +8,10 @@ import { DesktopHeader } from './DesktopHeader';
 interface PageLayoutProps {
   children: React.ReactNode;
   showLayout?: boolean;
+  activePage?: string;
 }
 
-export function PageLayout({ children, showLayout = true }: PageLayoutProps) {
+export function PageLayout({ children, showLayout = true, activePage = '' }: PageLayoutProps) {
   const { data: session } = useSession();
   const isAuthenticated = !!session?.user;
   const userData = session?.user;
@@ -21,7 +22,7 @@ export function PageLayout({ children, showLayout = true }: PageLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DesktopSidebar activePage="" />
+      <DesktopSidebar activePage={activePage} />
       <div className="ml-64 flex-1 transition-all duration-300">
         <DesktopHeader
           userName={userData?.name || 'John Doe'}
