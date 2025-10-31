@@ -82,75 +82,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </div>
 
-      {/* Pet & Friend Section */}
-      <Card className="mb-6 bg-gradient-to-br from-[var(--teal-50)] to-white border-[var(--teal-200)]">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-2 gap-6">
-            {/* Pet Companion */}
-            <div>
-              <h3 className="mb-4">Your Pet Companion</h3>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-[var(--teal-200)] hover:shadow-md transition-all cursor-pointer">
-                      <div className="text-5xl">🐱</div>
-                      <div className="flex-1">
-                        <p className="mb-1">Whiskers</p>
-                        <p className="text-sm text-muted-foreground">Level 5 • Happy</p>
-                        <Progress value={65} className="h-2 mt-2" />
-                      </div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="text-center">
-                      <p>🌱 Growth Level: 5</p>
-                      <p>🔥 Streak Days: 7</p>
-                      <p className="text-xs text-muted-foreground mt-1">Keep focusing to grow!</p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            {/* Friends Online */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3>Friends Online</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-[var(--teal-500)] hover:text-[var(--teal-600)]"
-                  onClick={() => onNavigate('interaction')}
-                >
-                  Add Friend
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {onlineFriends.map((friend, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--teal-200)] hover:shadow-sm transition-shadow cursor-pointer"
-                  >
-                    <Avatar className="w-10 h-10 border-2 border-[var(--teal-400)]">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.name}`} />
-                      <AvatarFallback>{friend.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm truncate">{friend.name}</p>
-                        <span className="text-lg">{friend.pet}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">{friend.course}</p>
-                    </div>
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
+  
       {/* Main Content Grid */}
       <div className="grid grid-cols-3 gap-6">
         {/* Left Column - Courses */}
