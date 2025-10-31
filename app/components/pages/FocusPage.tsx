@@ -458,10 +458,10 @@ export function FocusPage() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center gap-2 px-4 py-2.5 bg-orange-500 rounded-2xl text-white hover:shadow-lg hover:scale-105 transition-all duration-200">
+                <Button size="sm" className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--teal-400)] hover:bg-[var(--teal-500)] text-white hover:shadow-lg hover:scale-105 transition-all duration-200">
                   <Flame className="w-5 h-5" />
                   <span>{streakDays} days</span>
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="bg-white border-teal-200 shadow-lg">
                 <div className="text-center p-2">

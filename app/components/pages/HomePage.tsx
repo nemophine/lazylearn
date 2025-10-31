@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+// import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { Search, BookOpen, Video, Brain, Code, Palette, Music, Languages, ChevronRight, Play, Clock, Users, Flame } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
@@ -17,7 +17,9 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
-  const { data: session } = useSession();
+  // const { data: session } = useSession();
+  // Mock session for development
+  const session = null;
   const user = session?.user;
 
   // State for dynamically updated profile data
@@ -76,17 +78,17 @@ export function HomePage({ onNavigate }: HomePageProps) {
   }, [user?.name, user?.image]);
 
   // Reset to guest when session changes
-  useEffect(() => {
-    if (!session) {
-      setProfileData({
-        userName: '',
-        userImage: ''
-      });
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('userProfile');
-      }
-    }
-  }, [session]);
+  // useEffect(() => {
+  //   if (!session) {
+  //     setProfileData({
+  //       userName: '',
+  //       userImage: ''
+  //     });
+  //     if (typeof window !== 'undefined') {
+  //       localStorage.removeItem('userProfile');
+  //     }
+  //   }
+  // }, [session]);
 
   const categories = [
     { icon: Brain, label: 'Science', tooltip: 'Explore biology, physics, chemistry and more' },
