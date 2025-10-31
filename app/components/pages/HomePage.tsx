@@ -1,8 +1,8 @@
 'use client';
 
-// import { useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-import { Search, BookOpen, Video, Brain, Code, Palette, Music, Languages, ChevronRight, Play, Clock, Users, Flame } from 'lucide-react';
+import { Search, BookOpen, Video, ChevronRight, Play, Clock, Users, Flame, Star, User, Calendar } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { Badge } from '../ui/badge';
@@ -17,9 +17,7 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
-  // const { data: session } = useSession();
-  // Mock session for development
-  const session = null;
+  const { data: session } = useSession();
   const user = session?.user;
 
   // State for dynamically updated profile data
@@ -78,26 +76,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
   }, [user?.name, user?.image]);
 
   // Reset to guest when session changes
-  // useEffect(() => {
-  //   if (!session) {
-  //     setProfileData({
-  //       userName: '',
-  //       userImage: ''
-  //     });
-  //     if (typeof window !== 'undefined') {
-  //       localStorage.removeItem('userProfile');
-  //     }
-  //   }
-  // }, [session]);
+  useEffect(() => {
+    if (!session) {
+      setProfileData({
+        userName: '',
+        userImage: ''
+      });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userProfile');
+      }
+    }
+  }, [session]);
 
-  const categories = [
-    { icon: Brain, label: 'Science', tooltip: 'Explore biology, physics, chemistry and more' },
-    { icon: Palette, label: 'Art', tooltip: 'Creative arts, design, and visual expression' },
-    { icon: Code, label: 'Coding', tooltip: 'Programming and software development' },
-    { icon: Music, label: 'Music', tooltip: 'Theory, instruments, and composition' },
-    { icon: Languages, label: 'Languages', tooltip: 'Learn new languages and cultures' },
-    { icon: BookOpen, label: 'Literature', tooltip: 'Books, writing, and storytelling' },
-  ];
 
   const recentlyWatched = [
     { title: 'Introduction to React', progress: 65, duration: '12 min', image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400' },
@@ -105,15 +95,90 @@ export function HomePage({ onNavigate }: HomePageProps) {
   ];
 
   const recommendedCourses = [
-    { title: 'Advanced JavaScript', description: 'Master modern JS patterns', lessons: 24, duration: '4h 30m', progress: 0 },
-    { title: 'UX Design Principles', description: 'Create beautiful user experiences', lessons: 18, duration: '3h 15m', progress: 0 },
-    { title: 'Python for Beginners', description: 'Start coding with Python', lessons: 32, duration: '6h 45m', progress: 0 },
+    {
+      title: 'Advanced JavaScript',
+      description: 'Master modern JavaScript patterns and best practices',
+      detailedDescription: 'Learn ES6+, async programming, design patterns, and modern frameworks. Perfect for developers looking to level up their JavaScript skills.',
+      lessons: 24,
+      duration: '4h 30m',
+      progress: 0,
+      level: 'Advanced',
+      instructor: 'John Smith',
+      rating: 4.8,
+      students: 1250,
+      image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400'
+    },
+    {
+      title: 'UX Design Principles',
+      description: 'Create beautiful user experiences',
+      detailedDescription: 'Master user research, wireframing, prototyping, and design thinking. Build interfaces that users love and that drive business results.',
+      lessons: 18,
+      duration: '3h 15m',
+      progress: 0,
+      level: 'Intermediate',
+      instructor: 'Sarah Johnson',
+      rating: 4.9,
+      students: 980,
+      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400'
+    },
+    {
+      title: 'Python for Beginners',
+      description: 'Start coding with Python from scratch',
+      detailedDescription: 'No prior experience needed. Learn variables, functions, data structures, and build real-world applications. Python is perfect for beginners!',
+      lessons: 32,
+      duration: '6h 45m',
+      progress: 0,
+      level: 'Beginner',
+      instructor: 'Mike Chen',
+      rating: 4.7,
+      students: 2100,
+      image: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400'
+    },
   ];
 
   const onlineFriends = [
-    { name: 'Emma', pet: '🐱', course: 'JavaScript Basics' },
-    { name: 'Alex', pet: '🐶', course: 'UI Design' },
-    { name: 'Sarah', pet: '🦊', course: 'Python 101' },
+    { name: 'Emma', avatar: '👩‍💻', course: 'JavaScript Basics', progress: 75, status: 'studying' },
+    { name: 'Alex', avatar: '👨‍🎨', course: 'UI Design', progress: 45, status: 'paused' },
+    { name: 'Sarah', avatar: '👩‍🔬', course: 'Python 101', progress: 90, status: 'studying' },
+  ];
+
+  const friendsCourseActivity = [
+    {
+      friend: 'Emma',
+      course: 'JavaScript Basics',
+      lesson: 'Lesson 5: Async Programming',
+      progress: 75,
+      timeLeft: '15 min',
+      status: 'active',
+      avatar: '👩‍💻'
+    },
+    {
+      friend: 'Alex',
+      course: 'UI Design Principles',
+      lesson: 'Lesson 3: Color Theory',
+      progress: 45,
+      timeLeft: '20 min',
+      status: 'active',
+      avatar: '👨‍🎨'
+    },
+    {
+      friend: 'Sarah',
+      course: 'Python for Data Science',
+      lesson: 'Lesson 8: Pandas',
+      progress: 90,
+      timeLeft: '5 min',
+      status: 'active',
+      avatar: '👩‍🔬'
+    },
+    {
+      friend: 'Mike',
+      course: 'React Development',
+      lesson: 'Lesson 2: Components',
+      progress: 30,
+      timeLeft: '25 min',
+      status: 'completed',
+      avatar: '👨‍💻'
+    }
   ];
 
   return (
@@ -132,218 +197,265 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <p className="text-sm text-muted-foreground">Ready to learn today?</p>
           </div>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[var(--teal-400)] to-[var(--teal-300)] rounded-2xl text-white hover:shadow-md transition-shadow">
-                <Flame className="w-5 h-5" />
-                <span>7 days</span>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>You've focused 7 days in a row! 🔥</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+        <div className="flex items-center gap-3">
+          {/* Level Learner Badge */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[var(--teal-400)] to-[var(--teal-300)] rounded-xl text-white hover:shadow-md transition-shadow">
+                  <Star className="w-4 h-4" />
+                  <span className="text-sm font-medium">Lvl 5</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="text-center">
+                  <p className="font-medium">Level 5 Learner</p>
+                  <p className="text-xs text-muted-foreground">2,450 / 3,000 XP</p>
+                  <p className="text-xs text-muted-foreground mt-1">550 XP to next level</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input
-            placeholder="Search courses or topics..."
-            className="pl-12 h-14 rounded-2xl bg-[var(--teal-50)] border-[var(--teal-200)]"
-            onClick={() => onNavigate('search')}
-          />
+          {/* Streak Counter */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[var(--teal-400)] to-[var(--teal-300)] rounded-xl text-white hover:shadow-md transition-shadow">
+                  <Flame className="w-4 h-4" />
+                  <span className="text-sm font-medium">7 days</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>You've focused 7 days in a row! 🔥</p>
+                <p className="text-xs text-muted-foreground mt-1">Keep it going!</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 
-  
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-3 gap-6">
-        {/* Left Column - Courses */}
-        <div className="col-span-2 space-y-6">
-          {/* Recommended Courses */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3>Recommended Courses</h3>
-              <button className="text-sm text-[var(--teal-500)] flex items-center gap-1 hover:text-[var(--teal-600)]">
-                See all <ChevronRight className="w-4 h-4" />
-              </button>
+      {/* Friends Course Processing Section */}
+      <Card className="mb-6 bg-gradient-to-br from-[var(--teal-50)] to-white border-[var(--teal-200)]">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800">Friends Course Activity</h3>
+              <p className="text-sm text-muted-foreground">See what your friends are learning</p>
             </div>
-            <div className="space-y-3">
-              {recommendedCourses.map((course, index) => (
-                <Card key={index} className="hover:shadow-md transition-shadow border-[var(--teal-200)]">
-                  <CardContent className="p-5">
-                    <div className="flex gap-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)] rounded-2xl flex items-center justify-center flex-shrink-0">
-                        <Video className="w-8 h-8 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="mb-1">{course.title}</p>
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-1">{course.description}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{course.lessons} lessons</span>
-                          <span>•</span>
-                          <span>{course.duration}</span>
-                        </div>
-                        {course.progress > 0 && (
-                          <Progress value={course.progress} className="h-1.5 mt-2" />
-                        )}
-                      </div>
-                      <Button size="sm" className="rounded-full bg-[var(--teal-400)] hover:bg-[var(--teal-500)] shrink-0">
-                        Start
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-[var(--teal-300)] text-[var(--teal-600)] hover:bg-[var(--teal-50)]"
+              onClick={() => onNavigate('community')}
+            >
+              View All Friends
+            </Button>
           </div>
 
-          {/* Recently Watched */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3>Recently Watched</h3>
-              <button className="text-sm text-[var(--teal-500)] flex items-center gap-1 hover:text-[var(--teal-600)]">
-                See all <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {recentlyWatched.map((video, index) => (
-                <Card key={index} className="overflow-hidden hover:shadow-md transition-shadow border-[var(--teal-200)]">
-                  <CardContent className="p-0">
-                    <div className="relative h-32 w-full">
-                      <ImageWithFallback
-                        src={video.image}
-                        alt={video.title}
-                        className="w-full h-full object-fill"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                        <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <Play className="w-5 h-5 text-[var(--teal-500)] ml-0.5" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <p className="mb-2 text-sm line-clamp-1">{video.title}</p>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Clock className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">{video.duration}</span>
-                      </div>
-                      <Progress value={video.progress} className="h-1.5 mb-1" />
-                      <p className="text-xs text-muted-foreground">{video.progress}% complete</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Categories Section */}
-          <div>
-            <h3 className="mb-4">Explore Categories</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {categories.map((category) => {
-                const Icon = category.icon;
-                return (
-                  <TooltipProvider key={category.label}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button className="flex flex-col items-center gap-2 p-4 bg-card rounded-2xl hover:shadow-md transition-all border border-[var(--teal-200)] hover:border-[var(--teal-400)]">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)] rounded-xl flex items-center justify-center">
-                            <Icon className="w-6 h-6 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {friendsCourseActivity.map((activity, index) => (
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-[var(--teal-200)] hover:border-[var(--teal-400)] bg-white">
+                      <CardContent className="p-4">
+                        {/* Friend Avatar and Status */}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="relative">
+                            <div className="text-2xl">{activity.avatar}</div>
+                            <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                              activity.status === 'active' ? 'bg-green-500' :
+                              activity.status === 'completed' ? 'bg-blue-500' : 'bg-gray-400'
+                            }`} />
                           </div>
-                          <span className="text-sm">{category.label}</span>
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">{category.tooltip}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                );
-              })}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{activity.friend}</p>
+                            <p className="text-xs text-muted-foreground">{activity.timeLeft} left</p>
+                          </div>
+                        </div>
+
+                        {/* Course Info */}
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs font-medium text-gray-700 line-clamp-1">{activity.course}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-1">{activity.lesson}</p>
+                          </div>
+
+                          {/* Progress Bar */}
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <span>Progress</span>
+                              <span>{activity.progress}%</span>
+                            </div>
+                            <Progress
+                              value={activity.progress}
+                              className="h-1.5"
+                              style={{
+                                backgroundColor: '#e5f3f0',
+                                // Override the progress bar color based on status
+                                '--progress-background': activity.status === 'completed' ? '#3b82f6' : '#14b8a6'
+                              } as React.CSSProperties}
+                            />
+                          </div>
+
+                          {/* Status Badge */}
+                          <div className="flex items-center justify-between">
+                            <Badge
+                              variant="outline"
+                              className={`text-xs ${
+                                activity.status === 'active' ? 'border-green-500 text-green-700 bg-green-50' :
+                                activity.status === 'completed' ? 'border-blue-500 text-blue-700 bg-blue-50' :
+                                'border-gray-500 text-gray-700 bg-gray-50'
+                              }`}
+                            >
+                              {activity.status === 'active' ? '📚 Studying' :
+                               activity.status === 'completed' ? '✅ Completed' : '⏸️ Paused'}
+                            </Badge>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-[var(--teal-600)] transition-colors" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="p-3 max-w-xs">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{activity.avatar}</span>
+                        <div>
+                          <p className="font-medium text-sm">{activity.friend}</p>
+                          <p className="text-xs text-muted-foreground">{activity.status}</p>
+                        </div>
+                      </div>
+                      <div className="text-xs space-y-1">
+                        <p><strong>Course:</strong> {activity.course}</p>
+                        <p><strong>Current:</strong> {activity.lesson}</p>
+                        <p><strong>Time Remaining:</strong> {activity.timeLeft}</p>
+                        <p><strong>Progress:</strong> {activity.progress}% complete</p>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ))}
+          </div>
+
+          {/* Summary Stats */}
+          <div className="mt-6 pt-4 border-t border-[var(--teal-200)]">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-[var(--teal-50)] rounded-xl p-3">
+                <p className="text-lg font-semibold text-[var(--teal-700)]">
+                  {friendsCourseActivity.filter(f => f.status === 'active').length}
+                </p>
+                <p className="text-xs text-[var(--teal-600)]">Currently Studying</p>
+              </div>
+              <div className="bg-blue-50 rounded-xl p-3">
+                <p className="text-lg font-semibold text-blue-700">
+                  {friendsCourseActivity.filter(f => f.status === 'completed').length}
+                </p>
+                <p className="text-xs text-blue-600">Completed Today</p>
+              </div>
+              <div className="bg-purple-50 rounded-xl p-3">
+                <p className="text-lg font-semibold text-purple-700">
+                  {Math.round(friendsCourseActivity.reduce((acc, f) => acc + f.progress, 0) / friendsCourseActivity.length)}%
+                </p>
+                <p className="text-xs text-purple-600">Average Progress</p>
+              </div>
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Right Column - Profile & Actions */}
-        <div className="space-y-6">
-          {/* Profile Card */}
-          <Card className="bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)] border-0 shadow-lg">
-            <CardContent className="p-6 text-white">
-              <div className="text-center mb-4">
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-3xl">⭐</span>
-                </div>
-                <h3 className="text-white mb-1">Level 5 Learner</h3>
-                <p className="text-white/90 text-sm">2,450 / 3,000 points</p>
-              </div>
-              <Progress value={82} className="h-2 bg-white/20 mb-4" />
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
-                  <p className="text-2xl text-white mb-1">24</p>
-                  <p className="text-xs text-white/90">Courses</p>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
-                  <p className="text-2xl text-white mb-1">156</p>
-                  <p className="text-xs text-white/90">Hours</p>
-                </div>
-              </div>
-              <Button
-                variant="secondary"
-                className="w-full rounded-2xl bg-white/20 hover:bg-white/30 text-white border-0"
-                onClick={() => onNavigate('profile')}
-              >
-                View Profile
-              </Button>
-            </CardContent>
-          </Card>
+      {/* Main Content */}
+      <div className="space-y-8">
+        {/* Recommended Courses */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold">Recommended Courses</h3>
+            <button className="text-sm text-[var(--teal-500)] flex items-center gap-1 hover:text-[var(--teal-600)]">
+              See all <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-6">
+            {recommendedCourses.map((course, index) => (
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Card className="group hover:shadow-xl transition-all duration-300 border-[var(--teal-200)] hover:border-[var(--teal-400)] cursor-pointer">
+                      <CardContent className="p-6">
+                        {/* Course Image */}
+                        <div className="relative h-40 mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)]">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Video className="w-12 h-12 text-white opacity-80" />
+                          </div>
+                          {/* Course Level Badge */}
+                          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-[var(--teal-700)]">
+                            {course.level}
+                          </div>
+                        </div>
 
-          {/* Focus Mode CTA */}
-          <Card className="border-2 border-dashed border-[var(--teal-300)] bg-[var(--teal-50)]">
-            <CardContent className="p-6 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--teal-400)] to-[var(--teal-300)] rounded-full flex items-center justify-center mx-auto mb-3">
-                <Clock className="w-8 h-8 text-white" />
-              </div>
-              <h4 className="mb-2">Start Focus Session</h4>
-              <p className="text-sm text-muted-foreground mb-4">Block distractions and grow your pet</p>
-              <Button
-                className="w-full rounded-2xl bg-[var(--teal-400)] hover:bg-[var(--teal-500)]"
-                onClick={() => onNavigate('focus')}
-              >
-                Focus Now
-              </Button>
-            </CardContent>
-          </Card>
+                        {/* Course Content */}
+                        <div className="space-y-3">
+                          <div>
+                            <h4 className="font-semibold text-lg mb-1">{course.title}</h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                          </div>
 
-          {/* Active Missions */}
-          <Card className="bg-gradient-to-br from-[var(--teal-300)] to-[var(--teal-200)] border-0">
-            <CardContent className="p-6">
-              <h4 className="text-foreground mb-3">Active Missions</h4>
-              <div className="space-y-3">
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3">
-                  <p className="text-sm text-foreground mb-2">Complete 5 lessons</p>
-                  <Progress value={60} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">3/5 complete</p>
-                </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3">
-                  <p className="text-sm text-foreground mb-2">Study for 30 minutes</p>
-                  <Progress value={80} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">24/30 min</p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full mt-4 rounded-2xl bg-white/40 border-white/60 hover:bg-white/60"
-                onClick={() => onNavigate('mission')}
-              >
-                View All Missions
-              </Button>
-            </CardContent>
-          </Card>
+                          {/* Course Stats */}
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              <span>{course.lessons} lessons</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{course.duration}</span>
+                            </div>
+                          </div>
+
+                          {/* Instructor and Rating */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">{course.instructor}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                              <span className="text-xs text-muted-foreground">{course.rating}</span>
+                            </div>
+                          </div>
+
+                          {/* Students Count */}
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Users className="w-3 h-3" />
+                            <span>{course.students.toLocaleString()} students</span>
+                          </div>
+
+                          {/* Start Button */}
+                          <Button size="sm" className="w-full rounded-xl bg-[var(--teal-400)] hover:bg-[var(--teal-500)] text-white font-medium group-hover:scale-105 transition-all">
+                            Start Course
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="p-4 max-w-sm">
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm">{course.title}</h4>
+                      <p className="text-xs text-muted-foreground">{course.detailedDescription}</p>
+                      <div className="flex items-center gap-2 pt-2 border-t">
+                        <Badge variant="outline" className="text-xs">{course.level}</Badge>
+                        <div className="flex items-center gap-1 text-xs">
+                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                          <span>{course.rating} ({course.students}+ students)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ))}
+          </div>
         </div>
       </div>
     </div>

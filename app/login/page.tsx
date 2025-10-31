@@ -28,8 +28,20 @@ export default function LoginPage() {
   };
 
   const handleLineSignIn = async () => {
-    // LINE login not implemented yet
-    console.log('LINE login not implemented');
+    setIsLoading(true);
+    try {
+      // Use standard NextAuth signIn for LINE (this handles all the OAuth flow properly)
+      await signIn('line', {
+        callbackUrl: '/',
+        redirect: true
+      });
+    } catch (error) {
+      console.error('LINE sign in failed:', error);
+      setIsLoading(false);
+
+      // Show error to user
+      alert('LINE login failed. Please try again or use Google login.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,11 +98,15 @@ export default function LoginPage() {
 
               <Button
                 onClick={handleLineSignIn}
-                className="w-full h-12 rounded-xl bg-green-500 hover:bg-green-600 text-white"
-                disabled
+                className="w-full h-12 rounded-xl"
+                style={{ backgroundColor: '#00B900', color: 'white' }}
+                disabled={isLoading}
+                variant="default"
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#00a000'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B900'}
               >
                 <MessageCircle className="w-5 h-5 mr-3" />
-                Continue with LINE (Coming Soon)
+                Continue with LINE
               </Button>
             </div>
 
@@ -108,35 +124,31 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-11 h-12 rounded-xl"
-                    required
-                  />
-                </div>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full h-12 rounded-xl border border-border bg-background px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
+                  <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-11 pr-11 h-12 rounded-xl"
+                    className="w-full h-12 rounded-xl border border-border bg-background px-3 pr-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground z-10"
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
