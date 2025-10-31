@@ -150,7 +150,6 @@ export function DesktopSidebar({ activePage }: DesktopSidebarProps) {
   ];
 
   const otherItems: SidebarItem[] = [
-    { id: 'edit-profile', icon: User, label: 'Edit Profile', href: '/edit-profile' },
     { id: 'analysis', icon: BarChart3, label: 'Analysis', href: '/analysis' },
     { id: 'certificate', icon: Award, label: 'Certificates', href: '/certificates' },
     { id: 'interaction', icon: Calendar, label: 'My Schedule', href: '/schedule' },
