@@ -1,6 +1,8 @@
 'use client';
 
-import { Bell, Coins, Lock, Search } from 'lucide-react';
+import { Bell, Coins, Lock, Search, Settings, User } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Input } from './ui/input';
 import { Progress } from './ui/progress';
@@ -14,6 +16,7 @@ interface DesktopHeaderProps {
 
 export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProps) {
   const { isFocusMode } = useFocusMode();
+  const [isHovering, setIsHovering] = useState(false);
 
   return (
     <div className="h-20 bg-white border-b border-border px-8 flex items-center justify-between">
@@ -71,16 +74,29 @@ export function DesktopHeader({ userName, points, level = 5 }: DesktopHeaderProp
         )}
 
         {/* User Profile */}
-        <div className="flex items-center gap-3 pl-4 border-l border-border">
+        <Link
+          href="/profile"
+          className="flex items-center gap-3 pl-4 border-l border-border hover:bg-[var(--teal-50)] rounded-2xl px-3 py-2 transition-all cursor-pointer group"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          <div className="relative">
+            <Avatar className="w-10 h-10 border-2 border-[var(--teal-400)]">
+              <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
+              <AvatarFallback>{userName[0]}</AvatarFallback>
+            </Avatar>
+            {/* Settings Icon Overlay - appears on hover */}
+            <div className={`absolute -bottom-1 -right-1 bg-[var(--teal-500)] text-white rounded-full p-1 transition-all duration-200 ${
+              isHovering ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+            }`}>
+              <Settings className="w-3 h-3" />
+            </div>
+          </div>
           <div className="text-right">
-            <p className="text-sm">{userName}</p>
+            <p className="text-sm font-medium group-hover:text-[var(--teal-700)] transition-colors">{userName}</p>
             <p className="text-xs text-muted-foreground">Level {level}</p>
           </div>
-          <Avatar className="w-10 h-10 border-2 border-[var(--teal-400)]">
-            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
-            <AvatarFallback>{userName[0]}</AvatarFallback>
-          </Avatar>
-        </div>
+        </Link>
       </div>
     </div>
   );
