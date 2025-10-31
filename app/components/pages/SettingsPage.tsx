@@ -326,7 +326,7 @@ export function SettingsPage({ onLogout }: SettingsPageProps) {
                     key={itemIndex}
                     className={`flex items-center gap-4 p-4 hover:bg-[var(--teal-50)] transition-colors ${
                       itemIndex !== section.items.length - 1 ? 'border-b border-border' : ''
-                    } ${!item.hasToggle ? 'cursor-pointer' : ''}`}
+                    } ${!(item as any).hasToggle ? 'cursor-pointer' : ''}`}
                   >
                     <div className="w-12 h-12 bg-[var(--teal-100)] rounded-xl flex items-center justify-center flex-shrink-0">
                       <Icon className="w-6 h-6 text-[var(--teal-600)]" />
@@ -335,16 +335,16 @@ export function SettingsPage({ onLogout }: SettingsPageProps) {
                       <h4 className="font-medium mb-1">{item.label}</h4>
                       <p className="text-sm text-muted-foreground">{item.description}</p>
                     </div>
-                    {item.value && (
-                      <span className="text-sm text-muted-foreground mr-3">{item.value}</span>
+                    {(item as any).value && (
+                      <span className="text-sm text-muted-foreground mr-3">{(item as any).value}</span>
                     )}
-                    {item.hasToggle && item.key && (
+                    {(item as any).hasToggle && (item as any).key && (
                       <Switch
-                        checked={settings[item.key as keyof typeof settings]}
-                        onCheckedChange={() => handleToggle(item.key as keyof typeof settings)}
+                        checked={Boolean(settings[(item as any).key as keyof typeof settings])}
+                        onCheckedChange={() => handleToggle((item as any).key as keyof typeof settings)}
                       />
                     )}
-                    {item.hasArrow && (
+                    {(item as any).hasArrow && (
                       <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     )}
                   </div>

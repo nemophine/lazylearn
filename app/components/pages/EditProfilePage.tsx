@@ -477,11 +477,7 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
                       transformOrigin: 'center',
                       userSelect: 'none',
                       WebkitUserSelect: 'none',
-                      WebkitDraggable: 'false',
-                      KhtmlUserDrag: 'false',
-                      MozUserDrag: 'false',
-                      OUserDrag: 'none',
-                    }}
+                      }}
                     draggable={false}
                     />
                 ) : (

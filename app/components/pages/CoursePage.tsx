@@ -293,7 +293,7 @@ export function CoursePage({ onNavigate }: CoursePageProps) {
       <div className="space-y-8">
         {categories.map((category) => {
           const CategoryIcon = category.icon;
-          const categoryCourses = coursesByCategory[category.name];
+          const categoryCourses = coursesByCategory[category.name as keyof typeof coursesByCategory];
 
           return (
             <Card key={category.name} className="overflow-hidden">

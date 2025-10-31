@@ -311,13 +311,11 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
               </div>
               {section.items.map((item, itemIndex) => {
                 const Icon = item.icon;
-                const ItemContent = item.href ? Link : 'div';
-                const itemProps = item.href ? { href: item.href } : {};
 
-                return (
-                  <ItemContent
+                return item.href ? (
+                  <Link
                     key={itemIndex}
-                    {...itemProps}
+                    href={item.href}
                     className={`flex items-center gap-4 p-4 hover:bg-[var(--teal-50)] transition-colors cursor-pointer ${
                       itemIndex !== section.items.length - 1 ? 'border-b border-border' : ''
                     }`}
@@ -330,14 +328,40 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
                     </div>
                     {item.hasToggle && (
                       <Switch
-                        checked={item.enabled}
+                        checked={(item as any).enabled || false}
                         onCheckedChange={() => {}}
                       />
                     )}
                     {item.hasArrow && (
                       <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     )}
-                  </ItemContent>
+                  </Link>
+                ) : (
+                  <div
+                    key={itemIndex}
+                    className={`flex items-center gap-4 p-4 hover:bg-[var(--teal-50)] transition-colors cursor-pointer ${
+                      itemIndex !== section.items.length - 1 ? 'border-b border-border' : ''
+                    }`}
+                  >
+                    <div className="w-12 h-12 bg-[var(--teal-100)] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6 text-[var(--teal-600)]" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{item.label}</h4>
+                      {(item as any).description && (
+                        <p className="text-sm text-muted-foreground">{(item as any).description}</p>
+                      )}
+                    </div>
+                    {item.hasToggle && (
+                      <Switch
+                        checked={(item as any).enabled || false}
+                        onCheckedChange={() => {}}
+                      />
+                    )}
+                    {item.hasArrow && (
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    )}
+                  </div>
                 );
               })}
             </div>
